@@ -1,0 +1,300 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0B1220;
+    color:white;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+.dashboard{
+    min-height:100vh;
+}
+
+.navbar{
+    background:#111827;
+    border-bottom:2px solid #2563EB;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:20px 40px;
+}
+
+.navbar h2{
+    margin:0;
+}
+
+.online{
+    color:#22C55E;
+    font-weight:bold;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:25px;
+    padding:30px;
+}
+
+.card{
+    background:#172033;
+    border:1px solid #2E3B55;
+    border-radius:15px;
+    padding:20px;
+    min-height:350px;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    border-color:#3B82F6;
+}
+
+.card h3{
+    margin-bottom:15px;
+    color:#60A5FA;
+}
+
+.cameraBox{
+    height:220px;
+    background:#111827;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:10px;
+    border:2px dashed #334155;
+    margin-top:15px;
+    font-size:22px;
+}
+
+.mapBox{
+    margin-top:15px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.zone{
+    height:100px;
+    background:#111827;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:10px;
+    border:1px solid #334155;
+    transition:0.3s;
+}
+
+.zone:hover{
+    background:#2563EB;
+    cursor:pointer;
+}
+.btn{
+
+margin-top:20px;
+
+width:100%;
+
+padding:12px;
+
+background:#2563EB;
+
+color:white;
+
+border:none;
+
+border-radius:8px;
+
+font-size:16px;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.btn:hover{
+
+background:#1D4ED8;
+
+}
+.cameraBox{
+    margin-top:20px;
+    height:180px;
+    border:2px dashed #3B82F6;
+    border-radius:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#9CA3AF;
+}
+
+.mapBox{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.zone{
+    background:#334155;
+    padding:20px;
+    text-align:center;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.3s;
+    font-weight:bold;
+}
+
+.zone:hover{
+    background:#2563EB;
+}
+
+.grid{
+    padding:30px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:25px;
+    align-items:start;
+}
+.navRight{
+
+    display:flex;
+    align-items:center;
+    gap:25px;
+
+}
+
+.clock{
+
+    color:#60A5FA;
+    font-weight:bold;
+    font-size:18px;
+
+}
+.alertBanner{
+
+    background:#DC2626;
+
+    color:white;
+
+    padding:15px;
+
+    text-align:center;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    animation:flash 1s infinite;
+
+}
+
+@keyframes flash{
+
+    0%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:.5;
+    }
+
+    100%{
+        opacity:1;
+    }
+
+}
+.tacticalMap{
+
+display:grid;
+
+grid-template-columns:repeat(4,1fr);
+
+gap:12px;
+
+margin-top:20px;
+
+}
+
+.mapCell{
+
+height:70px;
+
+background:#1E293B;
+
+border:2px solid #334155;
+
+border-radius:12px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.mapCell:hover{
+
+background:#2563EB;
+
+transform:scale(1.05);
+
+border-color:#60A5FA;
+
+}
+.green{
+
+background:#15803D;
+
+}
+
+.red{
+
+background:#DC2626;
+
+animation:pulse 1s infinite;
+
+}
+
+.yellow{
+
+background:#EAB308;
+
+color:black;
+
+}
+
+.blue{
+
+background:#2563EB;
+
+}
+
+@keyframes pulse{
+
+0%{
+transform:scale(1);
+}
+
+50%{
+transform:scale(1.08);
+}
+
+100%{
+transform:scale(1);
+}
+
+}
