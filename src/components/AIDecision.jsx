@@ -1,4 +1,4 @@
-function AIDecision({ status, vehicle, priority }) {
+function AIDecision({ status, vehicle, priority, location }) {
   return (
     <div className="card">
 
@@ -13,6 +13,10 @@ function AIDecision({ status, vehicle, priority }) {
       <br />
 
       <p><strong>Priority:</strong> {priority}</p>
+
+      <br />
+
+      <p><strong>Location:</strong> {location}</p>
 
     </div>
   );

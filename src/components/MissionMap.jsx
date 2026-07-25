@@ -1,56 +1,47 @@
 function MissionMap({ handleMission }) {
 
   const zones = [
-    { name:"A1", color:"red" },
-    { name:"A2", color:"green" },
-    { name:"A3", color:"green" },
-    { name:"A4", color:"green" },
+    { name: "A1" },
+    { name: "A2" },
+    { name: "A3" },
+    { name: "A4" },
 
-    { name:"B1", color:"green" },
-    { name:"B2", color:"yellow" },
-    { name:"B3", color:"green" },
-    { name:"B4", color:"green" },
+    { name: "B1" },
+    { name: "B2" },
+    { name: "B3" },
+    { name: "B4" },
 
-    { name:"C1", color:"green" },
-    { name:"C2", color:"green" },
-    { name:"C3", color:"blue" },
-    { name:"C4", color:"green" },
+    { name: "C1" },
+    { name: "C2" },
+    { name: "C3" },
+    { name: "C4" },
 
-    { name:"D1", color:"green" },
-    { name:"D2", color:"green" },
-    { name:"D3", color:"green" },
-    { name:"D4", color:"green" }
+    { name: "D1" },
+    { name: "D2" },
+    { name: "D3" },
+    { name: "D4" }
   ];
 
   return (
-
     <div className="card">
 
       <h3>🌍 Tactical Mission Map</h3>
 
       <div className="tacticalMap">
 
-        {zones.map((zone,index)=>(
+        {zones.map((zone, index) => (
 
           <div
-
             key={index}
+            className="mapCell"
 
-            className={`mapCell ${zone.color}`}
+            onClick={() => {
 
-            onClick={()=>{
-
-              if(zone.name==="A1")
-                handleMission("survivor");
-
-              else if(zone.name==="B2")
-                handleMission("flood");
-
-              else if(zone.name==="C3")
+              if (zone.name === "A2")
                 handleMission("fire");
 
-              else if(zone.name==="D4")
-                handleMission("forest");
+              else if (zone.name === "C1")
+                handleMission("flood");
 
             }}
 
@@ -65,7 +56,6 @@ function MissionMap({ handleMission }) {
       </div>
 
     </div>
-
   );
 
 }

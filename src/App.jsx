@@ -12,14 +12,14 @@ import AlertBanner from "./components/AlertBanner";
 function App() {
 
   const [mission, setMission] = useState({
-    status: "Standby",
-    vehicle: "None",
-    priority: "Low",
-    destination: "-",
-    vehicleStatus: "Idle",
-    battery: "100%"
-  });
-
+  status: "Standby",
+  vehicle: "None",
+  priority: "Low",
+  location: "-",
+  destination: "-",
+  vehicleStatus: "Idle",
+  battery: "100%"
+});
   const [timeline, setTimeline] = useState([]);
 
   function addTimeline(message) {
@@ -50,32 +50,36 @@ function App() {
 
     else if (type === "flood") {
 
-      setMission({
-        status: "🌊 Flood Detected",
-        vehicle: "🚤 Rescue Boat",
-        priority: "Critical",
-        destination: "Zone 2",
-        vehicleStatus: "Sailing",
-        battery: "91%"
-      });
+     setMission({
+  status: "🌊 Flood Detected",
+  vehicle: "🚤 Rescue Boat",
+  priority: "Critical",
+  location: "C1",
+  destination: "Zone C1",
+  vehicleStatus: "Sailing",
+  battery: "91%"
+});
 
-      addTimeline("🌊 Flood Detected");
-      addTimeline("🚤 Boat Dispatched");
+addTimeline("🌊 Flood Detected");
+addTimeline("📍 Location: C1");
+addTimeline("🚤 Boat Dispatched");
     }
 
     else if (type === "fire") {
 
       setMission({
-        status: "🔥 Fire Detected",
-        vehicle: "🚁 Drone",
-        priority: "Critical",
-        destination: "Zone 3",
-        vehicleStatus: "Flying",
-        battery: "88%"
-      });
+  status: "🔥 Fire Detected",
+  vehicle: "🚁 Drone",
+  priority: "Critical",
+  location: "A2",
+  destination: "Zone A2",
+  vehicleStatus: "Flying",
+  battery: "88%"
+});
 
-      addTimeline("🔥 Fire Detected");
-      addTimeline("🚁 Drone Dispatched");
+addTimeline("🔥 Fire Detected");
+addTimeline("📍 Location: A2");
+addTimeline("🚁 Drone Dispatched");
     }
 
     else if (type === "forest") {
@@ -108,11 +112,11 @@ function App() {
         <MissionMap handleMission={handleMission} />
 
         <AIDecision
-          status={mission.status}
-          vehicle={mission.vehicle}
-          priority={mission.priority}
-        />
-
+  status={mission.status}
+  vehicle={mission.vehicle}
+  priority={mission.priority}
+  location={mission.location}
+/>
         <VehicleStatus mission={mission} />
         <ConnectionStatus />
 
