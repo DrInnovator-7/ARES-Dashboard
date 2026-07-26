@@ -1,8 +1,9 @@
-import admin from "firebase-admin";
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getDatabase } from "firebase-admin/database";
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
@@ -12,20 +13,23 @@ if (!admin.apps.length) {
   });
 }
 
-const db = admin.database();
+const db = getDatabase();
 
 export default async function handler(req, res) {
-
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   const { event } = req.body;
 
-  let mission = {};
+  let mission = {
+    status: "Standby",
+    vehicle: "None",
+    priority: "Low",
+    zone: "-"
+  };
 
   switch (event) {
-
     case "fire":
       mission = {
         status: "Fire Detected",
@@ -61,19 +65,11 @@ export default async function handler(req, res) {
         zone: "D2",
       };
       break;
-
-    default:
-      mission = {
-        status: "Standby",
-        vehicle: "None",
-        priority: "Low",
-        zone: "-",
-      };
   }
 
   await db.ref("mission").set(mission);
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     mission,
   });
