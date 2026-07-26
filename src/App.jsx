@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ref, onValue } from "firebase/database";
+import { db } from "./firebase";
 import "./App.css";
 import ConnectionStatus from "./components/ConnectionStatus";
 import Navbar from "./components/Navbar";
@@ -21,6 +23,29 @@ function App() {
   battery: "100%"
 });
   const [timeline, setTimeline] = useState([]);
+  useEffect(() => {
+
+  const missionRef = ref(db, "mission");
+
+  onValue(missionRef, (snapshot) => {
+
+    const data = snapshot.val();
+
+    if (data) {
+
+      setMission(prev => ({
+        ...prev,
+        status: data.status,
+        vehicle: data.vehicle,
+        priority: data.priority,
+        destination: data.zone
+      }));
+
+    }
+
+  });
+
+}, []);
 
   function addTimeline(message) {
     const time = new Date().toLocaleTimeString();
