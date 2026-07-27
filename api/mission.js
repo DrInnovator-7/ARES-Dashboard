@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         mission = {
           status: "Fire Detected",
           zone: "A2",
-          vehicle: "Drone",
+          vehicle: "Fire Ambulance+Paramedics",
           priority: "High",
           timestamp: Date.now(),
         };
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
         mission = {
           status: "Flood Detected",
           zone: "C1",
-          vehicle: "Boat",
+          vehicle: "Boat+Paramedics",
           priority: "High",
           timestamp: Date.now(),
         };
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
         mission = {
           status: "Medical Emergency",
           zone: "B2",
-          vehicle: "Ambulance",
+          vehicle: "Paramedics",
           priority: "Medium",
           timestamp: Date.now(),
         };
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
         mission = {
           status: "Road Accident",
           zone: "D2",
-          vehicle: "Rescue Unit",
+          vehicle: "Rescue Unit+Paramedics",
           priority: "High",
           timestamp: Date.now(),
         };
