@@ -69,6 +69,7 @@ function App() {
   }, []);
 
   function handleMission(type) {
+    
 
     if (type === "fire") {
 
@@ -121,6 +122,7 @@ function App() {
         <ConnectionStatus />
 
         <MissionTimeline timeline={timeline} />
+        
 
       </div>
 

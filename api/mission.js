@@ -19,83 +19,109 @@ export default async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(405).json({
-      success: false,
-      error: "Only POST requests are allowed",
+      error: "Method Not Allowed",
     });
   }
+
+  const { event } = req.body;
+
+  let mission = {};
+
+  switch (event) {
+
+    case "fire":
+      mission = {
+        status: "🔥 Fire Detected",
+        vehicle: "Fire Ambulance+Paramedics",
+        priority: "High",
+        zone: "A2",
+      };
+      break;
+
+    case "flood":
+      mission = {
+        status: "🌊 Flood Detected",
+        vehicle: "Rescue Boat+Paramedics",
+        priority: "High",
+        zone: "C1",
+      };
+      break;
+
+    case "health":
+      mission = {
+        status: "❤️ Medical Emergency",
+        vehicle: "Ambulance",
+        priority: "Medium",
+        zone: "B2",
+      };
+      break;
+
+    case "accident":
+      mission = {
+        status: "🚗 Road Accident+Paramedics",
+        vehicle: "Rescue Unit",
+        priority: "High",
+        zone: "D2",
+      };
+      break;
+
+    default:
+      mission = {
+        status: "Standby",
+        vehicle: "None",
+        priority: "Low",
+        zone: "-",
+      };
+  }
+
+  // Save to Firebase
+  await db.ref("mission").set({
+    ...mission,
+    timestamp: Date.now(),
+  });
+
+  // ==========================
+  // Telegram Alert
+  // ==========================
 
   try {
 
-    const { event } = req.body;
+    const message =
+`🚨 ARES COMMAND CENTRE 🚨
 
-    let mission = {};
+Emergency : ${mission.status}
 
-    switch (event) {
+Vehicle : ${mission.vehicle}
 
-      case "fire":
-        mission = {
-          status: "Fire Detected",
-          zone: "A2",
-          vehicle: "Fire Ambulance+Paramedics",
-          priority: "High",
-          timestamp: Date.now(),
-        };
-        break;
+Priority : ${mission.priority}
 
-      case "flood":
-        mission = {
-          status: "Flood Detected",
-          zone: "C1",
-          vehicle: "Boat+Paramedics",
-          priority: "High",
-          timestamp: Date.now(),
-        };
-        break;
+Zone : ${mission.zone}
 
-      case "health":
-        mission = {
-          status: "Medical Emergency",
-          zone: "B2",
-          vehicle: "Paramedics",
-          priority: "Medium",
-          timestamp: Date.now(),
-        };
-        break;
+Time : ${new Date().toLocaleString("en-IN")}`;
 
-      case "accident":
-        mission = {
-          status: "Road Accident",
-          zone: "D2",
-          vehicle: "Rescue Unit+Paramedics",
-          priority: "High",
-          timestamp: Date.now(),
-        };
-        break;
-
-      default:
-        mission = {
-          status: "No Emergency",
-          zone: "-",
-          vehicle: "None",
-          priority: "Low",
-          timestamp: Date.now(),
-        };
-    }
-
-    await db.ref("mission").set(mission);
-
-    return res.status(200).json({
-      success: true,
-      mission,
-    });
+    await fetch(
+      `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: process.env.TELEGRAM_CHAT_ID,
+          text: message,
+        }),
+      }
+    );
 
   } catch (err) {
 
-    return res.status(500).json({
-      success: false,
-      error: err.message,
-    });
+    console.error("Telegram Error:", err);
 
   }
+
+  res.status(200).json({
+    success: true,
+    mission,
+  });
 
 }
