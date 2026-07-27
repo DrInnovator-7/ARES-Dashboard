@@ -1,4 +1,4 @@
-function MissionMap({ handleMission }) {
+function MissionMap({ handleMission, mission }) {
 
   const zones = [
     { name: "A1" },
@@ -23,18 +23,22 @@ function MissionMap({ handleMission }) {
   ];
 
   return (
+
     <div className="card">
 
       <h3>🌍 Tactical Mission Map</h3>
 
       <div className="tacticalMap">
 
-        {zones.map((zone, index) => (
+        {zones.map((zone) => (
 
           <div
-            key={index}
-            className="mapCell"
-
+            key={zone.name}
+            className={`mapCell ${
+              mission.destination === zone.name
+                ? "red"
+                : "green"
+            }`}
             onClick={() => {
 
               if (zone.name === "A2")
@@ -44,7 +48,6 @@ function MissionMap({ handleMission }) {
                 handleMission("flood");
 
             }}
-
           >
 
             {zone.name}
@@ -56,6 +59,7 @@ function MissionMap({ handleMission }) {
       </div>
 
     </div>
+
   );
 
 }
