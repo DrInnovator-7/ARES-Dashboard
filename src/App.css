@@ -516,3 +516,486 @@
     grid-template-columns: 1fr;
   }
 }
+/* ================= LOCATION ================= */
+
+.locationStats {
+  margin-bottom: 14px;
+}
+
+.locationGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 14px;
+}
+
+.mapCard {
+  min-height: 450px;
+}
+
+.mapStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8f98a6;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.map {
+  position: relative;
+  height: 350px;
+  overflow: hidden;
+  border: 1px solid #1d222c;
+  background: #090c11;
+}
+
+.mapGrid {
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(
+      rgba(100, 110, 125, 0.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(100, 110, 125, 0.08) 1px,
+      transparent 1px
+    );
+
+  background-size: 42px 42px;
+}
+
+.map::before,
+.map::after {
+  content: "";
+  position: absolute;
+  background: #171d26;
+}
+
+.map::before {
+  width: 100%;
+  height: 1px;
+  top: 48%;
+  left: 0;
+}
+
+.map::after {
+  width: 1px;
+  height: 100%;
+  left: 52%;
+  top: 0;
+}
+
+.vehicleMarker {
+  position: absolute;
+  left: 52%;
+  top: 48%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #dce2ea;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 20px rgba(220, 226, 234, 0.2);
+}
+
+.vehicleMarker span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #dce2ea;
+}
+
+.mapCenterLabel {
+  position: absolute;
+  left: 52%;
+  top: calc(48% + 20px);
+  transform: translateX(-50%);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #68717f;
+}
+
+.mapCoordinates {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  padding: 8px 10px;
+  border: 1px solid #242b35;
+  background: rgba(8, 10, 15, 0.9);
+  color: #8f98a6;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+}
+
+.gpsList {
+  border-top: 1px solid #1d222c;
+}
+
+.gpsList div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 4px;
+  border-bottom: 1px solid #1d222c;
+}
+
+.gpsList span {
+  color: #747d8a;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.gpsList b {
+  color: #aeb5c0;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.updateLocationButton,
+.gpsToggleButton {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #303742;
+  background: #141920;
+  color: #c7cdd6;
+  cursor: pointer;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  transition: 0.2s;
+}
+
+.updateLocationButton:hover,
+.gpsToggleButton:hover {
+  background: #1b212a;
+  border-color: #555f6d;
+}
+
+.gpsToggleButton {
+  margin-top: 8px;
+  color: #858e9b;
+}
+
+
+/* LOCATION RESPONSIVE */
+
+@media (max-width: 900px) {
+
+  .locationGrid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 650px) {
+
+  .map {
+    height: 280px;
+  }
+
+}
+/* ================= CAMERA ================= */
+/* ================= CAMERA ================= */
+
+.cameraGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 14px;
+}
+
+.cameraFeedCard {
+  min-height: 520px;
+}
+
+.cameraFeedStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8f98a6;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.cameraViewport {
+  position: relative;
+  height: 390px;
+  overflow: hidden;
+  border: 1px solid #1d222c;
+  background: #07090d;
+}
+
+.cameraViewport.nightVision {
+  background: #050906;
+}
+
+.webcamVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+  display: block;
+}
+
+.cameraViewport.nightVision .webcamVideo {
+  filter:
+    grayscale(1)
+    sepia(1)
+    hue-rotate(70deg)
+    saturate(1.5)
+    brightness(0.8);
+}
+
+.cameraStartOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background:
+    radial-gradient(
+      circle at center,
+      #151b23 0%,
+      #0b0e13 55%,
+      #07090d 100%
+    );
+}
+
+.cameraStartOverlay > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cameraStartIcon {
+  font-size: 30px;
+  color: #7f8895;
+  margin-bottom: 15px;
+}
+
+.cameraStartOverlay strong {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+.cameraStartOverlay small {
+  color: #626b78;
+  font-size: 10px;
+  margin-top: 8px;
+}
+
+.cameraStartOverlay button {
+  margin-top: 20px;
+  padding: 11px 24px;
+  border: 1px solid #3a424e;
+  background: #151a21;
+  color: #d2d7df;
+  cursor: pointer;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  transition: 0.2s;
+}
+
+.cameraStartOverlay button:hover {
+  background: #202630;
+  border-color: #657080;
+}
+
+.cameraError {
+  max-width: 300px;
+  margin-top: 14px;
+  color: #d88b8b;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.cameraScanlines {
+  position: absolute;
+  inset: 0;
+
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(255, 255, 255, 0.025) 4px
+  );
+
+  pointer-events: none;
+}
+
+.cameraCrosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80px;
+  height: 80px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cameraCrosshair span {
+  position: absolute;
+  background: rgba(220, 226, 234, 0.65);
+}
+
+.cameraCrosshair span:nth-child(1) {
+  width: 1px;
+  height: 25px;
+  left: 39px;
+  top: 0;
+}
+
+.cameraCrosshair span:nth-child(2) {
+  width: 1px;
+  height: 25px;
+  left: 39px;
+  bottom: 0;
+}
+
+.cameraCrosshair span:nth-child(3) {
+  height: 1px;
+  width: 25px;
+  left: 0;
+  top: 39px;
+}
+
+.cameraCrosshair span:nth-child(4) {
+  height: 1px;
+  width: 25px;
+  right: 0;
+  top: 39px;
+}
+
+.cameraCorner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: #737d8b;
+  border-style: solid;
+  pointer-events: none;
+}
+
+.cameraCorner.topLeft {
+  left: 18px;
+  top: 18px;
+  border-width: 1px 0 0 1px;
+}
+
+.cameraCorner.topRight {
+  right: 18px;
+  top: 18px;
+  border-width: 1px 1px 0 0;
+}
+
+.cameraCorner.bottomLeft {
+  left: 18px;
+  bottom: 18px;
+  border-width: 0 0 1px 1px;
+}
+
+.cameraCorner.bottomRight {
+  right: 18px;
+  bottom: 18px;
+  border-width: 0 1px 1px 0;
+}
+
+.cameraOverlayTop,
+.cameraOverlayBottom {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  color: #d0d5dd;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  pointer-events: none;
+}
+
+.cameraOverlayTop {
+  top: 18px;
+}
+
+.cameraOverlayBottom {
+  bottom: 18px;
+}
+
+.cameraStats {
+  border-top: 1px solid #1d222c;
+}
+
+.cameraStats div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 4px;
+  border-bottom: 1px solid #1d222c;
+}
+
+.cameraStats span {
+  color: #747d8a;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.cameraStats b {
+  color: #aeb5c0;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.cameraControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.cameraControls button {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #303742;
+  background: #141920;
+  color: #c7cdd6;
+  cursor: pointer;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  transition: 0.2s;
+}
+
+.cameraControls button:hover:not(:disabled) {
+  background: #1b212a;
+  border-color: #555f6d;
+}
+
+.cameraControls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.statusOffline {
+  background: #666d78;
+  box-shadow: none;
+}
+
+
+/* CAMERA RESPONSIVE */
+
+@media (max-width: 900px) {
+  .cameraGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .cameraViewport {
+    height: 280px;
+  }
+}
