@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
+import CommunicationVision from "./components/CommunicationVision";
 
 const pages = [
   "Overview",
@@ -7,18 +8,45 @@ const pages = [
   "Health",
   "Location",
   "Camera",
-  "Safety",
+  "Safety Engine",
   "Communication",
 ];
 
-const controlModes = ["Joystick", "EMG", "EEG"];
+const modes = [
+  {
+    id: "JOYSTICK",
+    icon: "🕹️",
+    label: "Joystick",
+    description: "Manual physical control",
+  },
+  {
+    id: "EMG",
+    icon: "💪",
+    label: "EMG",
+    description: "Muscle signal control",
+  },
+  {
+    id: "EEG",
+    icon: "🧠",
+    label: "EEG",
+    description: "Brain signal control",
+  },
+];
 
 function App() {
   const [activePage, setActivePage] = useState("Overview");
-  const [controlMode, setControlMode] = useState("Joystick");
-  const [movement, setMovement] = useState("STOP");
+
+  const [mode, setMode] = useState("JOYSTICK");
+  const [movement, setMovement] = useState("STOPPED");
+  const [battery, setBattery] = useState(100);
   const [speed, setSpeed] = useState(0);
 
+  // Safety
+  const [obstacle, setObstacle] = useState(false);
+  const [emergencyStop, setEmergencyStop] = useState(false);
+  const [safetyState, setSafetyState] = useState("ARMED");
+
+  // Location
   const [location, setLocation] = useState({
     latitude: 28.6139,
     longitude: 77.209,
@@ -26,23 +54,181 @@ function App() {
 
   const [gpsConnected, setGpsConnected] = useState(true);
 
+  // Camera
   const [cameraOnline, setCameraOnline] = useState(false);
   const [streamActive, setStreamActive] = useState(false);
   const [nightVision, setNightVision] = useState(false);
   const [cameraError, setCameraError] = useState("");
 
+  const [events, setEvents] = useState([
+    {
+      time: "SYSTEM",
+      text: "NEXUS initialized in simulation mode.",
+    },
+    {
+      time: "SYSTEM",
+      text: "Safety engine ready.",
+    },
+    {
+      time: "SYSTEM",
+      text: "No hardware connected.",
+    },
+  ]);
+
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
-  const handleMovement = (command) => {
-    setMovement(command);
+  // --------------------------------------------------
+  // EVENT LOGGER
+  // --------------------------------------------------
 
-    if (command === "STOP") {
+  const addEvent = (text) => {
+    setEvents((current) =>
+      [
+        {
+          time: new Date().toLocaleTimeString(),
+          text,
+        },
+        ...current,
+      ].slice(0, 8)
+    );
+  };
+
+  // --------------------------------------------------
+  // SAFETY STATE
+  // --------------------------------------------------
+
+  useEffect(() => {
+    if (emergencyStop) {
+      setSafetyState("E_STOP");
+      setMovement("STOPPED");
+      setSpeed(0);
+      return;
+    }
+
+    if (obstacle) {
+      setSafetyState("OBSTACLE");
+      setMovement("STOPPED");
+      setSpeed(0);
+      return;
+    }
+
+    setSafetyState("ARMED");
+  }, [obstacle, emergencyStop]);
+
+  // --------------------------------------------------
+  // MOBILITY COMMAND
+  // --------------------------------------------------
+
+  const command = (nextMovement) => {
+    if (emergencyStop) {
+      addEvent("Movement command blocked: emergency stop active.");
+      return;
+    }
+
+    if (nextMovement !== "STOPPED" && obstacle) {
+      setMovement("STOPPED");
+      setSpeed(0);
+
+      addEvent(
+        `Safety engine blocked ${nextMovement.toLowerCase()} command: obstacle detected.`
+      );
+
+      return;
+    }
+
+    setMovement(nextMovement);
+
+    if (nextMovement === "STOPPED") {
       setSpeed(0);
     } else {
       setSpeed(35);
+
+      setBattery((value) => Math.max(0, value - 1));
+    }
+
+    addEvent(`Movement command: ${nextMovement}.`);
+  };
+
+  // --------------------------------------------------
+  // CONTROL MODE
+  // --------------------------------------------------
+
+  const selectMode = (nextMode) => {
+    setMode(nextMode);
+    command("STOPPED");
+
+    addEvent(`Control interface changed to ${nextMode}.`);
+  };
+
+  // --------------------------------------------------
+  // KEYBOARD CONTROL
+  // --------------------------------------------------
+
+  useEffect(() => {
+    const handleKey = (event) => {
+      const keyMap = {
+        ArrowUp: "FORWARD",
+        ArrowDown: "BACKWARD",
+        ArrowLeft: "LEFT",
+        ArrowRight: "RIGHT",
+        " ": "STOPPED",
+      };
+
+      if (keyMap[event.key]) {
+        event.preventDefault();
+        command(keyMap[event.key]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+    };
+  });
+
+  // --------------------------------------------------
+  // OBSTACLE SIMULATION
+  // --------------------------------------------------
+
+  const toggleObstacle = () => {
+    const next = !obstacle;
+
+    setObstacle(next);
+
+    if (next) {
+      setMovement("STOPPED");
+      setSpeed(0);
+
+      addEvent("Obstacle detected. Safety engine stopped mobility.");
+    } else {
+      addEvent("Obstacle cleared. Safety engine restored to ARMED state.");
     }
   };
+
+  // --------------------------------------------------
+  // EMERGENCY STOP
+  // --------------------------------------------------
+
+  const toggleEmergencyStop = () => {
+    const next = !emergencyStop;
+
+    setEmergencyStop(next);
+
+    if (next) {
+      setMovement("STOPPED");
+      setSpeed(0);
+
+      addEvent("EMERGENCY STOP activated.");
+    } else {
+      addEvent("Emergency stop released. Safety engine armed.");
+    }
+  };
+
+  // --------------------------------------------------
+  // GPS
+  // --------------------------------------------------
 
   const simulateLocationUpdate = () => {
     setLocation((previous) => ({
@@ -52,7 +238,6 @@ function App() {
           (Math.random() - 0.5) * 0.0002
         ).toFixed(6)
       ),
-
       longitude: Number(
         (
           previous.longitude +
@@ -60,7 +245,13 @@ function App() {
         ).toFixed(6)
       ),
     }));
+
+    addEvent("Simulated GPS position updated.");
   };
+
+  // --------------------------------------------------
+  // CAMERA
+  // --------------------------------------------------
 
   const startCamera = async () => {
     try {
@@ -97,6 +288,8 @@ function App() {
 
       setCameraOnline(true);
       setStreamActive(true);
+
+      addEvent("Webcam connected to NEXUS.");
     } catch (error) {
       console.error(error);
 
@@ -104,17 +297,11 @@ function App() {
       setStreamActive(false);
 
       if (error.name === "NotAllowedError") {
-        setCameraError(
-          "Camera permission was denied."
-        );
+        setCameraError("Camera permission was denied.");
       } else if (error.name === "NotFoundError") {
-        setCameraError(
-          "No camera was detected on this device."
-        );
+        setCameraError("No camera was detected on this device.");
       } else {
-        setCameraError(
-          "Unable to access the camera."
-        );
+        setCameraError("Unable to access the camera.");
       }
     }
   };
@@ -134,6 +321,8 @@ function App() {
 
     setCameraOnline(false);
     setStreamActive(false);
+
+    addEvent("Webcam disconnected.");
   };
 
   const toggleStream = () => {
@@ -164,409 +353,648 @@ function App() {
     };
   }, []);
 
+  // --------------------------------------------------
+  // NAVIGATION ICONS
+  // --------------------------------------------------
+
+  const getIcon = (page) => {
+    const icons = {
+      Overview: "⌂",
+      Mobility: "◈",
+      Health: "♥",
+      Location: "⌖",
+      Camera: "◉",
+      "Safety Engine": "⚠",
+      Communication: "☏",
+    };
+
+    return icons[page];
+  };
+
+  // --------------------------------------------------
+  // RENDER
+  // --------------------------------------------------
+
   return (
-    <div className="app">
+    <div className="nexusApp">
 
-      {/* SIDEBAR */}
+      {/* TOP BAR */}
 
-      <aside className="sidebar">
+      <header className="topbar">
 
-        <div className="brand">
+        <div className="topbarTitle">
 
-          <div className="brandMark">N</div>
+          <div className="topbarSignal">
+            N
+          </div>
 
           <div>
-            <h1>NEXUS</h1>
-            <span>COMMAND SYSTEM</span>
+            <strong>NEXUS</strong>
+            <span>ASSISTIVE MOBILITY COMMAND SYSTEM</span>
           </div>
 
         </div>
 
-        <nav className="navigation">
+        <div className="topbarRight">
 
-          <p className="navLabel">SYSTEM</p>
-
-          {pages.map((page) => (
-            <button
-              key={page}
-              className={`navItem ${
-                activePage === page
-                  ? "active"
-                  : ""
-              }`}
-              onClick={() =>
-                setActivePage(page)
-              }
-            >
-              <span className="navDot">•</span>
-              {page}
-            </button>
-          ))}
-
-        </nav>
-
-        <div className="sidebarBottom">
+          <div className="clock">
+            {new Date().toLocaleTimeString()}
+          </div>
 
           <div className="connection">
+            <i></i>
+            SYSTEM ONLINE
+          </div>
 
-            <span className="statusDot"></span>
+        </div>
+
+      </header>
+
+
+      <div className="appLayout">
+
+        {/* SIDEBAR */}
+
+        <aside className="sidebar">
+
+          <div className="brandBlock">
+
+            <div className="brandMark">
+              N
+            </div>
 
             <div>
-              <strong>System Online</strong>
-              <small>
-                All core services operational
-              </small>
+              <strong>NEXUS</strong>
+              <span>Command System</span>
             </div>
 
           </div>
 
-        </div>
 
-      </aside>
+          <nav
+            className="navMenu"
+            aria-label="Primary navigation"
+          >
+
+            {pages.map((page) => (
+
+              <button
+                key={page}
+                className={`navItem ${
+                  activePage === page
+                    ? "active"
+                    : ""
+                }`}
+                onClick={() =>
+                  setActivePage(page)
+                }
+              >
+
+                <span>
+                  {getIcon(page)}
+                </span>
+
+                {page}
+
+              </button>
+
+            ))}
+
+          </nav>
 
 
-      {/* MAIN */}
-
-      <main className="main">
-
-        <header className="topbar">
-
-          <div>
-
-            <p className="sectionLabel">
-              NEXUS /{" "}
-              {activePage.toUpperCase()}
-            </p>
-
-            <h2>{activePage}</h2>
-
-          </div>
-
-          <div className="topStatus">
+          <div className="sidebarFooter">
 
             <span className="statusDot"></span>
 
-            ONLINE
+            Simulation mode
 
           </div>
 
-        </header>
+        </aside>
 
 
-        <section className="content">
+        {/* WORKSPACE */}
 
+        <main className="workspace">
 
-          {/* ================= OVERVIEW ================= */}
+          {/* ==================================================
+              OVERVIEW
+          ================================================== */}
 
           {activePage === "Overview" && (
             <>
-              <div className="welcome">
+
+              <section className="pageHeading">
 
                 <div>
 
-                  <p className="sectionLabel">
-                    CENTRAL COMMAND
+                  <p className="eyebrow">
+                    AURA MOBILITY PLATFORM
                   </p>
 
-                  <h3>NEXUS Overview</h3>
+                  <h1>
+                    System Overview
+                  </h1>
 
-                  <p>
-                    Central interface for
-                    monitoring and controlling
-                    the assistive mobility system.
+                  <p className="muted">
+                    Central interface for mobility,
+                    safety, health and connected systems.
                   </p>
 
                 </div>
 
-                <div className="systemState">
-
-                  <span className="statusDot"></span>
-
-                  SYSTEM READY
-
+                <div className="systemBadge">
+                  <span></span>
+                  SYSTEM ONLINE
                 </div>
 
-              </div>
+              </section>
 
 
-              <div className="dashboardGrid">
+              <section className="statGrid">
 
-                <div className="card">
+                <div className="statCard">
 
-                  <span className="cardLabel">
-                    CONTROL MODE
+                  <span className="statIcon">
+                    ◈
                   </span>
 
-                  <strong>
-                    {controlMode.toUpperCase()}
-                  </strong>
-
-                  <small>
-                    Active control interface
-                  </small>
-
-                </div>
-
-
-                <div className="card">
-
-                  <span className="cardLabel">
-                    MOBILITY
-                  </span>
-
-                  <strong>{movement}</strong>
-
-                  <small>
-                    Current movement command
-                  </small>
-
-                </div>
-
-
-                <div className="card">
-
-                  <span className="cardLabel">
-                    BATTERY
-                  </span>
-
-                  <strong>100%</strong>
-
-                  <small>
-                    Power system nominal
-                  </small>
-
-                </div>
-
-
-                <div className="card">
-
-                  <span className="cardLabel">
-                    SAFETY
-                  </span>
-
-                  <strong>ACTIVE</strong>
-
-                  <small>
-                    Safety engine monitoring
-                  </small>
-
-                </div>
-
-              </div>
-
-
-              <div className="lowerGrid">
-
-                <div className="largeCard">
-
-                  <div className="cardHeader">
-
-                    <div>
-
-                      <span className="cardLabel">
-                        SYSTEM STATUS
-                      </span>
-
-                      <h3>Core Systems</h3>
-
-                    </div>
-
+                  <div>
+                    <span>CONTROL MODE</span>
+                    <strong>
+                      {
+                        modes.find(
+                          (item) =>
+                            item.id === mode
+                        )?.label
+                      }
+                    </strong>
                   </div>
 
+                </div>
 
-                  <div className="systemList">
 
-                    <div>
-                      <span>
-                        Mobility Controller
-                      </span>
+                <div className="statCard">
 
-                      <b>READY</b>
-                    </div>
+                  <span className="statIcon">
+                    ⚡
+                  </span>
 
-                    <div>
-                      <span>
-                        Safety Engine
-                      </span>
+                  <div>
+                    <span>BATTERY</span>
+                    <strong>
+                      {battery}%
+                    </strong>
+                  </div>
 
-                      <b>ACTIVE</b>
-                    </div>
+                </div>
 
-                    <div>
-                      <span>
-                        Health Monitor
-                      </span>
 
-                      <b>READY</b>
-                    </div>
+                <div className="statCard">
 
-                    <div>
-                      <span>GPS</span>
+                  <span className="statIcon">
+                    ⌖
+                  </span>
 
-                      <b>STANDBY</b>
-                    </div>
+                  <div>
+                    <span>GPS</span>
+
+                    <strong>
+                      {gpsConnected
+                        ? "Connected"
+                        : "Offline"}
+                    </strong>
 
                   </div>
 
                 </div>
 
 
-                <div className="largeCard">
+                <div className="statCard">
 
-                  <div className="cardHeader">
+                  <span className="statIcon">
+                    ⚠
+                  </span>
 
-                    <div>
+                  <div>
 
-                      <span className="cardLabel">
-                        EVENTS
-                      </span>
+                    <span>SAFETY</span>
 
-                      <h3>System Log</h3>
-
-                    </div>
+                    <strong>
+                      {emergencyStop
+                        ? "E-STOP"
+                        : obstacle
+                        ? "Obstacle"
+                        : "Clear"}
+                    </strong>
 
                   </div>
 
+                </div>
 
-                  <div className="event">
+              </section>
 
-                    <span className="eventTime">
-                      NOW
+
+              <section className="contentGrid">
+
+                {/* CONTROL */}
+
+                <div className="panel controlPanel">
+
+                  <div className="panelHeader">
+
+                    <div>
+                      <p className="eyebrow">
+                        INPUT LAYER
+                      </p>
+
+                      <h2>
+                        Control Interface
+                      </h2>
+                    </div>
+
+                    <span className="livePill">
+                      SIMULATED
                     </span>
+
+                  </div>
+
+
+                  <div className="modeGrid">
+
+                    {modes.map((item) => (
+
+                      <button
+                        key={item.id}
+                        className={`modeButton ${
+                          mode === item.id
+                            ? "selected"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          selectMode(item.id)
+                        }
+                      >
+
+                        <span>
+                          {item.icon}
+                        </span>
+
+                        <strong>
+                          {item.label}
+                        </strong>
+
+                        <small>
+                          {mode === item.id
+                            ? "ACTIVE"
+                            : "SELECT"}
+                        </small>
+
+                      </button>
+
+                    ))}
+
+                  </div>
+
+
+                  <div className="commandArea">
+
+                    <div>
+
+                      <p className="eyebrow">
+                        MOBILITY COMMAND
+                      </p>
+
+                      <h3>
+                        {movement}
+                      </h3>
+
+                      <p className="muted">
+                        Arrow keys also work in
+                        simulation.
+                      </p>
+
+                    </div>
+
+
+                    <div className="dPad">
+
+                      <button
+                        onClick={() =>
+                          command("FORWARD")
+                        }
+                      >
+                        ▲
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          command("LEFT")
+                        }
+                      >
+                        ◀
+                      </button>
+
+                      <button
+                        className="stopButton"
+                        onClick={() =>
+                          command("STOPPED")
+                        }
+                      >
+                        ■
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          command("RIGHT")
+                        }
+                      >
+                        ▶
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          command("BACKWARD")
+                        }
+                      >
+                        ▼
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                {/* HEALTH */}
+
+                <div className="panel healthPanel">
+
+                  <div className="panelHeader">
+
+                    <div>
+
+                      <p className="eyebrow">
+                        HEALTH
+                      </p>
+
+                      <h2>
+                        Vitals Monitor
+                      </h2>
+
+                    </div>
+
+                    <span className="statePill safe">
+                      READY
+                    </span>
+
+                  </div>
+
+
+                  <div className="healthRows">
+
+                    <div>
+                      <span>
+                        ♥ Heart Rate
+                      </span>
+                      <strong>
+                        -- BPM
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        ◌ SpO₂
+                      </span>
+                      <strong>
+                        -- %
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        ♨ Temperature
+                      </span>
+                      <strong>
+                        -- °C
+                      </strong>
+                    </div>
+
+                  </div>
+
+
+                  <p className="muted note">
+                    Sensor connection will be
+                    added during hardware
+                    integration.
+                  </p>
+
+                </div>
+
+
+                {/* CAMERA */}
+
+                <div className="panel cameraPanel">
+
+                  <div className="panelHeader">
+
+                    <div>
+
+                      <p className="eyebrow">
+                        VISUAL FEED
+                      </p>
+
+                      <h2>
+                        Camera
+                      </h2>
+
+                    </div>
+
+                    <span className="statePill">
+                      {cameraOnline
+                        ? "ONLINE"
+                        : "OFFLINE"}
+                    </span>
+
+                  </div>
+
+
+                  <div className="cameraPlaceholder">
 
                     <span>
-                      NEXUS system initialized
+                      ◉
                     </span>
 
-                  </div>
+                    <strong>
+                      {cameraOnline
+                        ? "WEBCAM ONLINE"
+                        : "NO CAMERA SIGNAL"}
+                    </strong>
 
-
-                  <div className="event">
-
-                    <span className="eventTime">
-                      --:--
-                    </span>
-
-                    <span>
-                      Mobility subsystem ready
-                    </span>
+                    <small>
+                      {cameraOnline
+                        ? "Open Camera module for live feed"
+                        : "Waiting for connected camera"}
+                    </small>
 
                   </div>
 
                 </div>
 
-              </div>
+
+                {/* EVENTS */}
+
+                <div className="panel eventPanel">
+
+                  <div className="panelHeader">
+
+                    <div>
+
+                      <p className="eyebrow">
+                        SYSTEM LOG
+                      </p>
+
+                      <h2>
+                        Recent Events
+                      </h2>
+
+                    </div>
+
+                    <span className="muted">
+                      {events.length} events
+                    </span>
+
+                  </div>
+
+
+                  <div className="eventList">
+
+                    {events.map(
+                      (event, index) => (
+
+                        <div
+                          className="eventRow"
+                          key={`${event.time}-${index}`}
+                        >
+
+                          <span className="eventDot"></span>
+
+                          <div>
+
+                            <small>
+                              {event.time}
+                            </small>
+
+                            <p>
+                              {event.text}
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      )
+                    )}
+
+                  </div>
+
+                </div>
+
+              </section>
+
             </>
           )}
 
 
-          {/* ================= MOBILITY ================= */}
+          {/* ==================================================
+              MOBILITY
+          ================================================== */}
 
           {activePage === "Mobility" && (
             <>
 
-              <div className="welcome">
+              <section className="pageHeading">
 
                 <div>
 
-                  <p className="sectionLabel">
+                  <p className="eyebrow">
                     MOBILITY CORE
                   </p>
 
-                  <h3>Mobility Control</h3>
+                  <h1>
+                    Mobility Control
+                  </h1>
 
-                  <p>
-                    Select the active
-                    human-machine interface
-                    and control the simulated
-                    mobility system.
+                  <p className="muted">
+                    Select the active human-machine
+                    interface and control the mobility
+                    system.
                   </p>
 
                 </div>
 
-
-                <div className="systemState">
-
-                  <span className="statusDot"></span>
-
+                <div className="systemBadge">
+                  <span></span>
                   MOBILITY READY
-
                 </div>
 
-              </div>
+              </section>
 
 
-              <div className="largeCard mobilityCard">
+              <section className="panel mobilityMainPanel">
 
-                <div className="cardHeader">
+                <div className="panelHeader">
 
                   <div>
 
-                    <span className="cardLabel">
+                    <p className="eyebrow">
                       CONTROL INTERFACE
-                    </span>
+                    </p>
 
-                    <h3>
+                    <h2>
                       Select Control Mode
-                    </h3>
+                    </h2>
 
                   </div>
+
+                  <span className="livePill">
+                    ACTIVE
+                  </span>
 
                 </div>
 
 
                 <div className="modeGrid">
 
-                  {controlModes.map((mode) => (
+                  {modes.map((item) => (
 
                     <button
-                      key={mode}
+                      key={item.id}
                       className={`modeButton ${
-                        controlMode === mode
+                        mode === item.id
                           ? "selected"
                           : ""
                       }`}
-                      onClick={() => {
-
-                        setControlMode(mode);
-
-                        handleMovement("STOP");
-
-                      }}
+                      onClick={() =>
+                        selectMode(item.id)
+                      }
                     >
 
-                      <span className="modeIcon">
-
-                        {mode === "Joystick"
-                          ? "🕹"
-                          : mode === "EMG"
-                          ? "💪"
-                          : "🧠"}
-
+                      <span>
+                        {item.icon}
                       </span>
 
-
-                      <strong>{mode}</strong>
-
+                      <strong>
+                        {item.label}
+                      </strong>
 
                       <small>
-
-                        {mode === "Joystick"
-                          ? "Manual physical control"
-                          : mode === "EMG"
-                          ? "Muscle signal control"
-                          : "Brain signal control"}
-
+                        {mode === item.id
+                          ? "ACTIVE"
+                          : item.description}
                       </small>
-
-
-                      {controlMode === mode && (
-
-                        <span className="selectedLabel">
-                          ACTIVE
-                        </span>
-
-                      )}
 
                     </button>
 
@@ -574,22 +1002,24 @@ function App() {
 
                 </div>
 
-              </div>
+              </section>
 
 
-              <div className="mobilityGrid">
+              <section className="mobilityContentGrid">
 
-                <div className="largeCard">
+                <div className="panel">
 
-                  <div className="cardHeader">
+                  <div className="panelHeader">
 
                     <div>
 
-                      <span className="cardLabel">
+                      <p className="eyebrow">
                         COMMAND MANAGER
-                      </span>
+                      </p>
 
-                      <h3>Movement</h3>
+                      <h2>
+                        Movement
+                      </h2>
 
                     </div>
 
@@ -598,7 +1028,7 @@ function App() {
 
                   <div className="movementDisplay">
 
-                    <span className="movementLabel">
+                    <span>
                       CURRENT COMMAND
                     </span>
 
@@ -606,275 +1036,319 @@ function App() {
                       {movement}
                     </strong>
 
-                    <span>
-                      Source: {controlMode}
-                    </span>
+                    <small>
+                      Source: {mode}
+                    </small>
 
                   </div>
 
 
-                  <div className="directionPad">
-
-                    <div></div>
+                  <div className="dPad largeDPad">
 
                     <button
                       onClick={() =>
-                        handleMovement("FORWARD")
+                        command("FORWARD")
                       }
                     >
-                      ↑
+                      ▲
                     </button>
-
-                    <div></div>
-
 
                     <button
                       onClick={() =>
-                        handleMovement("LEFT")
+                        command("LEFT")
                       }
                     >
-                      ←
+                      ◀
                     </button>
-
 
                     <button
                       className="stopButton"
                       onClick={() =>
-                        handleMovement("STOP")
+                        command("STOPPED")
                       }
                     >
                       ■
                     </button>
 
+                    <button
+                      onClick={() =>
+                        command("RIGHT")
+                      }
+                    >
+                      ▶
+                    </button>
 
                     <button
                       onClick={() =>
-                        handleMovement("RIGHT")
+                        command("BACKWARD")
                       }
                     >
-                      →
+                      ▼
                     </button>
-
-
-                    <div></div>
-
-
-                    <button
-                      onClick={() =>
-                        handleMovement("REVERSE")
-                      }
-                    >
-                      ↓
-                    </button>
-
-
-                    <div></div>
 
                   </div>
 
                 </div>
 
 
-                <div className="largeCard">
+                <div className="panel">
 
-                  <div className="cardHeader">
+                  <div className="panelHeader">
 
                     <div>
 
-                      <span className="cardLabel">
+                      <p className="eyebrow">
                         MOBILITY STATUS
-                      </span>
+                      </p>
 
-                      <h3>Vehicle State</h3>
+                      <h2>
+                        Vehicle State
+                      </h2>
 
                     </div>
 
                   </div>
 
 
-                  <div className="mobilityStats">
+                  <div className="healthRows">
 
                     <div>
                       <span>
                         CONTROL MODE
                       </span>
 
-                      <b>
-                        {controlMode.toUpperCase()}
-                      </b>
+                      <strong>
+                        {mode}
+                      </strong>
                     </div>
 
                     <div>
-                      <span>MOVEMENT</span>
-                      <b>{movement}</b>
+                      <span>
+                        MOVEMENT
+                      </span>
+
+                      <strong>
+                        {movement}
+                      </strong>
                     </div>
 
                     <div>
-                      <span>SPEED</span>
-                      <b>{speed}%</b>
+                      <span>
+                        SPEED
+                      </span>
+
+                      <strong>
+                        {speed}%
+                      </strong>
                     </div>
 
                     <div>
-                      <span>MOTOR SYSTEM</span>
-                      <b>READY</b>
+                      <span>
+                        MOTOR SYSTEM
+                      </span>
+
+                      <strong>
+                        READY
+                      </strong>
                     </div>
 
                     <div>
-                      <span>SAFETY ENGINE</span>
-                      <b>ACTIVE</b>
+                      <span>
+                        SAFETY ENGINE
+                      </span>
+
+                      <strong>
+                        {safetyState}
+                      </strong>
                     </div>
 
                   </div>
 
                 </div>
 
-              </div>
+              </section>
 
             </>
           )}
 
 
-          {/* ================= LOCATION ================= */}
+          {/* ==================================================
+              HEALTH
+          ================================================== */}
+
+          {activePage === "Health" && (
+            <ModulePage
+              eyebrow="HEALTH MONITORING"
+              title="Vitals Monitor"
+              description="Monitor physiological signals from the connected health sensors."
+            >
+
+              <div className="healthDashboard">
+
+                <div className="healthMetric">
+                  <span>HEART RATE</span>
+                  <strong>--</strong>
+                  <small>BPM</small>
+                </div>
+
+                <div className="healthMetric">
+                  <span>SpO₂</span>
+                  <strong>--</strong>
+                  <small>%</small>
+                </div>
+
+                <div className="healthMetric">
+                  <span>TEMPERATURE</span>
+                  <strong>--</strong>
+                  <small>°C</small>
+                </div>
+
+              </div>
+
+              <p className="muted moduleNote">
+                MAX30102 and temperature sensing
+                will be connected during the hardware
+                integration phase.
+              </p>
+
+            </ModulePage>
+          )}
+
+
+          {/* ==================================================
+              LOCATION
+          ================================================== */}
 
           {activePage === "Location" && (
             <>
 
-              <div className="welcome">
+              <section className="pageHeading">
 
                 <div>
 
-                  <p className="sectionLabel">
+                  <p className="eyebrow">
                     NAVIGATION CORE
                   </p>
 
-                  <h3>
+                  <h1>
                     Location Tracking
-                  </h3>
+                  </h1>
 
-                  <p>
-                    Monitor the simulated
-                    position and navigation
+                  <p className="muted">
+                    Monitor the position and navigation
                     state of the mobility system.
                   </p>
 
                 </div>
 
-
-                <div className="systemState">
-
-                  <span className="statusDot"></span>
-
-                  GPS CONNECTED
-
+                <div className="systemBadge">
+                  <span></span>
+                  {gpsConnected
+                    ? "GPS CONNECTED"
+                    : "GPS OFFLINE"}
                 </div>
 
-              </div>
+              </section>
 
 
-              <div className="dashboardGrid locationStats">
+              <section className="statGrid">
 
-                <div className="card">
+                <div className="statCard">
 
-                  <span className="cardLabel">
-                    LATITUDE
+                  <span className="statIcon">
+                    N
                   </span>
 
-                  <strong>
-                    {location.latitude.toFixed(6)}
-                  </strong>
+                  <div>
+                    <span>LATITUDE</span>
 
-                  <small>
-                    Degrees North
-                  </small>
+                    <strong>
+                      {location.latitude.toFixed(6)}
+                    </strong>
+                  </div>
 
                 </div>
 
 
-                <div className="card">
+                <div className="statCard">
 
-                  <span className="cardLabel">
-                    LONGITUDE
+                  <span className="statIcon">
+                    E
                   </span>
 
-                  <strong>
-                    {location.longitude.toFixed(6)}
-                  </strong>
+                  <div>
+                    <span>LONGITUDE</span>
 
-                  <small>
-                    Degrees East
-                  </small>
+                    <strong>
+                      {location.longitude.toFixed(6)}
+                    </strong>
+                  </div>
 
                 </div>
 
 
-                <div className="card">
+                <div className="statCard">
 
-                  <span className="cardLabel">
-                    SPEED
+                  <span className="statIcon">
+                    ↗
                   </span>
 
-                  <strong>
-                    {speed === 0
-                      ? "0.0"
-                      : (
-                          speed * 0.12
-                        ).toFixed(1)}
-                  </strong>
+                  <div>
+                    <span>SPEED</span>
 
-                  <small>
-                    km/h
-                  </small>
+                    <strong>
+                      {speed === 0
+                        ? "0.0"
+                        : (speed * 0.12).toFixed(1)}{" "}
+                      km/h
+                    </strong>
+                  </div>
 
                 </div>
 
 
-                <div className="card">
+                <div className="statCard">
 
-                  <span className="cardLabel">
-                    GPS STATUS
+                  <span className="statIcon">
+                    ⌖
                   </span>
 
-                  <strong>
-                    {gpsConnected
-                      ? "CONNECTED"
-                      : "OFFLINE"}
-                  </strong>
+                  <div>
+                    <span>GPS STATUS</span>
 
-                  <small>
-                    {gpsConnected
-                      ? "Signal available"
-                      : "Signal unavailable"}
-                  </small>
+                    <strong>
+                      {gpsConnected
+                        ? "CONNECTED"
+                        : "OFFLINE"}
+                    </strong>
+                  </div>
 
                 </div>
 
-              </div>
+              </section>
 
 
-              <div className="locationGrid">
+              <section className="locationGrid">
 
-                <div className="largeCard mapCard">
+                <div className="panel mapCard">
 
-                  <div className="cardHeader">
+                  <div className="panelHeader">
 
                     <div>
 
-                      <span className="cardLabel">
+                      <p className="eyebrow">
                         LIVE POSITION
-                      </span>
+                      </p>
 
-                      <h3>Vehicle Map</h3>
+                      <h2>
+                        Vehicle Map
+                      </h2>
 
                     </div>
 
-
-                    <div className="mapStatus">
-
-                      <span className="statusDot"></span>
-
+                    <span className="livePill">
                       TRACKING
-
-                    </div>
+                    </span>
 
                   </div>
 
@@ -883,26 +1357,18 @@ function App() {
 
                     <div className="mapGrid"></div>
 
-
-                    <div
-                      className="vehicleMarker"
-                      title="Simulated vehicle position"
-                    >
+                    <div className="vehicleMarker">
                       <span></span>
                     </div>
 
-
                     <div className="mapCenterLabel">
-                      AURA
+                      NEXUS
                     </div>
 
-
                     <div className="mapCoordinates">
-
                       {location.latitude.toFixed(6)}
                       {" , "}
                       {location.longitude.toFixed(6)}
-
                     </div>
 
                   </div>
@@ -910,42 +1376,47 @@ function App() {
                 </div>
 
 
-                <div className="largeCard">
+                <div className="panel">
 
-                  <div className="cardHeader">
+                  <div className="panelHeader">
 
                     <div>
 
-                      <span className="cardLabel">
+                      <p className="eyebrow">
                         GPS TELEMETRY
-                      </span>
+                      </p>
 
-                      <h3>
+                      <h2>
                         Navigation Data
-                      </h3>
+                      </h2>
 
                     </div>
 
                   </div>
 
 
-                  <div className="gpsList">
+                  <div className="healthRows">
 
                     <div>
                       <span>
                         GPS MODULE
                       </span>
 
-                      <b>
+                      <strong>
                         {gpsConnected
                           ? "ONLINE"
                           : "OFFLINE"}
-                      </b>
+                      </strong>
                     </div>
 
                     <div>
-                      <span>SATELLITES</span>
-                      <b>8</b>
+                      <span>
+                        SATELLITES
+                      </span>
+
+                      <strong>
+                        8
+                      </strong>
                     </div>
 
                     <div>
@@ -953,29 +1424,19 @@ function App() {
                         POSITION FIX
                       </span>
 
-                      <b>3D FIX</b>
+                      <strong>
+                        3D FIX
+                      </strong>
                     </div>
 
                     <div>
-                      <span>MOVEMENT</span>
-                      <b>{movement}</b>
-                    </div>
+                      <span>
+                        MOVEMENT
+                      </span>
 
-                    <div>
-                      <span>HEADING</span>
-
-                      <b>
-                        {movement === "STOP"
-                          ? "--"
-                          : movement === "FORWARD"
-                          ? "N"
-                          : movement === "REVERSE"
-                          ? "S"
-                          : movement === "LEFT"
-                          ? "W"
-                          : "E"}
-                      </b>
-
+                      <strong>
+                        {movement}
+                      </strong>
                     </div>
 
                     <div>
@@ -983,28 +1444,27 @@ function App() {
                         LAST UPDATE
                       </span>
 
-                      <b>JUST NOW</b>
+                      <strong>
+                        JUST NOW
+                      </strong>
                     </div>
 
                   </div>
 
 
                   <button
-                    className="updateLocationButton"
-                    onClick={
-                      simulateLocationUpdate
-                    }
+                    className="toggleButton"
+                    onClick={simulateLocationUpdate}
                   >
                     SIMULATE GPS UPDATE
                   </button>
 
 
                   <button
-                    className="gpsToggleButton"
+                    className="toggleButton"
                     onClick={() =>
                       setGpsConnected(
-                        (previous) =>
-                          !previous
+                        (previous) => !previous
                       )
                     }
                   >
@@ -1015,44 +1475,41 @@ function App() {
 
                 </div>
 
-              </div>
+              </section>
 
             </>
           )}
 
 
-          {/* ================= CAMERA ================= */}
+          {/* ==================================================
+              CAMERA
+          ================================================== */}
 
           {activePage === "Camera" && (
             <>
 
-              <div className="welcome">
+              <section className="pageHeading">
 
                 <div>
 
-                  <p className="sectionLabel">
+                  <p className="eyebrow">
                     VISUAL MONITORING
                   </p>
 
-                  <h3>Camera System</h3>
+                  <h1>
+                    Camera System
+                  </h1>
 
-                  <p>
-                    Monitor the live webcam feed
-                    from the NEXUS command center.
+                  <p className="muted">
+                    Monitor the live webcam feed from
+                    the NEXUS command center.
                   </p>
 
                 </div>
 
+                <div className="systemBadge">
 
-                <div className="systemState">
-
-                  <span
-                    className={`statusDot ${
-                      cameraOnline
-                        ? ""
-                        : "statusOffline"
-                    }`}
-                  ></span>
+                  <span></span>
 
                   {cameraOnline
                     ? "WEBCAM ONLINE"
@@ -1060,46 +1517,32 @@ function App() {
 
                 </div>
 
-              </div>
+              </section>
 
 
-              <div className="cameraGrid">
+              <section className="cameraGrid">
 
+                <div className="panel cameraFeedCard">
 
-                {/* LIVE WEBCAM */}
-
-                <div className="largeCard cameraFeedCard">
-
-                  <div className="cardHeader">
+                  <div className="panelHeader">
 
                     <div>
 
-                      <span className="cardLabel">
+                      <p className="eyebrow">
                         LIVE FEED
-                      </span>
+                      </p>
 
-                      <h3>
+                      <h2>
                         NEXUS Webcam
-                      </h3>
+                      </h2>
 
                     </div>
 
-
-                    <div className="cameraFeedStatus">
-
-                      <span
-                        className={`statusDot ${
-                          streamActive
-                            ? ""
-                            : "statusOffline"
-                        }`}
-                      ></span>
-
+                    <span className="livePill">
                       {streamActive
                         ? "STREAM ACTIVE"
                         : "STREAM PAUSED"}
-
-                    </div>
+                    </span>
 
                   </div>
 
@@ -1136,8 +1579,8 @@ function App() {
                           </strong>
 
                           <small>
-                            Start the camera to
-                            begin live monitoring
+                            Start the camera to begin
+                            live monitoring
                           </small>
 
                           <button
@@ -1165,23 +1608,16 @@ function App() {
                         <div className="cameraScanlines"></div>
 
                         <div className="cameraCrosshair">
-
                           <span></span>
                           <span></span>
                           <span></span>
                           <span></span>
-
                         </div>
 
-
                         <div className="cameraCorner topLeft"></div>
-
                         <div className="cameraCorner topRight"></div>
-
                         <div className="cameraCorner bottomLeft"></div>
-
                         <div className="cameraCorner bottomRight"></div>
-
 
                         <div className="cameraOverlayTop">
 
@@ -1220,98 +1656,89 @@ function App() {
                 </div>
 
 
-                {/* CAMERA TELEMETRY */}
+                <div className="panel">
 
-                <div className="largeCard">
-
-                  <div className="cardHeader">
+                  <div className="panelHeader">
 
                     <div>
 
-                      <span className="cardLabel">
+                      <p className="eyebrow">
                         CAMERA TELEMETRY
-                      </span>
+                      </p>
 
-                      <h3>
+                      <h2>
                         Stream Status
-                      </h3>
+                      </h2>
 
                     </div>
 
                   </div>
 
 
-                  <div className="cameraStats">
+                  <div className="healthRows">
 
                     <div>
-
                       <span>
                         CAMERA SOURCE
                       </span>
 
-                      <b>
+                      <strong>
                         LAPTOP WEBCAM
-                      </b>
-
+                      </strong>
                     </div>
 
-
                     <div>
+                      <span>
+                        CAMERA
+                      </span>
 
-                      <span>CAMERA</span>
-
-                      <b>
+                      <strong>
                         {cameraOnline
                           ? "ONLINE"
                           : "OFFLINE"}
-                      </b>
-
+                      </strong>
                     </div>
 
-
                     <div>
+                      <span>
+                        STREAM
+                      </span>
 
-                      <span>STREAM</span>
-
-                      <b>
+                      <strong>
                         {streamActive
                           ? "ACTIVE"
                           : "PAUSED"}
-                      </b>
-
+                      </strong>
                     </div>
 
-
                     <div>
+                      <span>
+                        RESOLUTION
+                      </span>
 
-                      <span>RESOLUTION</span>
-
-                      <b>
+                      <strong>
                         AUTO
-                      </b>
-
+                      </strong>
                     </div>
 
-
                     <div>
+                      <span>
+                        AUDIO
+                      </span>
 
-                      <span>AUDIO</span>
-
-                      <b>
+                      <strong>
                         DISABLED
-                      </b>
-
+                      </strong>
                     </div>
 
-
                     <div>
+                      <span>
+                        CONNECTION
+                      </span>
 
-                      <span>CONNECTION</span>
-
-                      <b>
+                      <strong>
                         LOCAL
-                      </b>
-
+                      </strong>
                     </div>
 
                   </div>
@@ -1360,50 +1787,365 @@ function App() {
 
                 </div>
 
-              </div>
+              </section>
 
             </>
           )}
 
 
-          {/* ================= OTHER MODULES ================= */}
+          {/* ==================================================
+              SAFETY ENGINE
+          ================================================== */}
 
-          {activePage !== "Overview" &&
-            activePage !== "Mobility" &&
-            activePage !== "Location" &&
-            activePage !== "Camera" && (
+          {activePage === "Safety Engine" && (
+            <>
 
-              <div className="modulePage">
+              <section className="pageHeading">
 
-                <span className="sectionLabel">
-                  NEXUS MODULE
-                </span>
+                <div>
 
-                <h3>{activePage}</h3>
+                  <p className="eyebrow">
+                    SAFETY CORE
+                  </p>
 
-                <p>
-                  The{" "}
-                  {activePage.toLowerCase()}{" "}
-                  module is ready for development.
-                </p>
+                  <h1>
+                    Safety Engine
+                  </h1>
 
-                <div className="moduleStatus">
-
-                  <span className="statusDot"></span>
-
-                  MODULE INITIALIZED
+                  <p className="muted">
+                    Independent safety monitoring and
+                    mobility command protection layer.
+                  </p>
 
                 </div>
 
+                <div
+                  className={`systemBadge ${
+                    safetyState !== "ARMED"
+                      ? "dangerBadge"
+                      : ""
+                  }`}
+                >
+
+                  <span></span>
+
+                  {safetyState}
+
+                </div>
+
+              </section>
+
+
+              <section className="safetyDashboard">
+
+                <div className="panel safetyMainPanel">
+
+                  <div className="panelHeader">
+
+                    <div>
+
+                      <p className="eyebrow">
+                        SAFETY STATE
+                      </p>
+
+                      <h2>
+                        Protection Status
+                      </h2>
+
+                    </div>
+
+                    <span
+                      className={`statePill ${
+                        safetyState === "ARMED"
+                          ? "safe"
+                          : "danger"
+                      }`}
+                    >
+                      {safetyState}
+                    </span>
+
+                  </div>
+
+
+                  <div
+                    className={`safetyIndicator ${
+                      safetyState !== "ARMED"
+                        ? "dangerIndicator"
+                        : ""
+                    }`}
+                  >
+
+                    <div className="safetyRing">
+
+                      <span>
+                        {safetyState === "ARMED"
+                          ? "✓"
+                          : "!"}
+                      </span>
+
+                    </div>
+
+                    <strong>
+
+                      {safetyState === "ARMED"
+                        ? "Safety system armed"
+                        : safetyState === "OBSTACLE"
+                        ? "Obstacle detected"
+                        : "Emergency stop active"}
+
+                    </strong>
+
+                    <small>
+
+                      {safetyState === "ARMED"
+                        ? "Mobility commands may pass through the safety layer."
+                        : "Mobility commands are currently blocked."}
+
+                    </small>
+
+                  </div>
+
+                </div>
+
+
+                <div className="panel">
+
+                  <div className="panelHeader">
+
+                    <div>
+
+                      <p className="eyebrow">
+                        SAFETY INPUTS
+                      </p>
+
+                      <h2>
+                        Sensors & Controls
+                      </h2>
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="healthRows">
+
+                    <div>
+                      <span>
+                        ULTRASONIC SENSOR
+                      </span>
+
+                      <strong>
+                        {obstacle
+                          ? "OBSTACLE"
+                          : "CLEAR"}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        EMERGENCY STOP
+                      </span>
+
+                      <strong>
+                        {emergencyStop
+                          ? "ACTIVE"
+                          : "READY"}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        COMMAND STATUS
+                      </span>
+
+                      <strong>
+                        {obstacle ||
+                        emergencyStop
+                          ? "BLOCKED"
+                          : "PERMITTED"}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        MOTOR OUTPUT
+                      </span>
+
+                      <strong>
+                        {movement === "STOPPED"
+                          ? "STOPPED"
+                          : "ACTIVE"}
+                      </strong>
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div className="panel safetyControlsPanel">
+
+                  <div className="panelHeader">
+
+                    <div>
+
+                      <p className="eyebrow">
+                        SIMULATION
+                      </p>
+
+                      <h2>
+                        Safety Controls
+                      </h2>
+
+                    </div>
+
+                  </div>
+
+
+                  <button
+                    className={`toggleButton ${
+                      obstacle
+                        ? "dangerToggle"
+                        : ""
+                    }`}
+                    onClick={toggleObstacle}
+                  >
+                    {obstacle
+                      ? "CLEAR SIMULATED OBSTACLE"
+                      : "SIMULATE OBSTACLE"}
+                  </button>
+
+
+                  <button
+                    className={`toggleButton ${
+                      emergencyStop
+                        ? "dangerToggle emergencyButtonActive"
+                        : "emergencyButton"
+                    }`}
+                    onClick={toggleEmergencyStop}
+                  >
+                    {emergencyStop
+                      ? "RELEASE EMERGENCY STOP"
+                      : "EMERGENCY STOP"}
+                  </button>
+
+                </div>
+
+              </section>
+
+            </>
+          )}
+
+
+          {/* ==================================================
+              COMMUNICATION
+          ================================================== */}
+
+          {activePage === "Communication" && (
+            <ModulePage
+              eyebrow="ASSISTIVE COMMUNICATION"
+              title="Communication"
+              description="Communication interface for gesture-based and connected assistance."
+            >
+
+              <div className="communicationPanel">
+
+                <div className="communicationStatus">
+                  <span className="statusDot"></span>
+                  COMMUNICATION READY
+                </div>
+
+                <div className="communicationGrid">
+
+                  <button>
+                    HELP
+                  </button>
+
+                  <button>
+                    WATER
+                  </button>
+
+                  <button>
+                    YES
+                  </button>
+
+                  <button>
+                    NO
+                  </button>
+
+                  <button>
+                    EMERGENCY
+                  </button>
+
+                  <button>
+                    CALL CAREGIVER
+                  </button>
+
+                </div>
+
+                <p className="muted">
+                  Camera-based gesture communication
+                  will be integrated into this module.
+                </p>
+
               </div>
 
-            )}
+            </ModulePage>
+          )}
 
-        </section>
+        </main>
 
-      </main>
+      </div>
 
     </div>
+  );
+}
+
+
+// --------------------------------------------------
+// GENERIC MODULE PAGE
+// --------------------------------------------------
+
+function ModulePage({
+  eyebrow,
+  title,
+  description,
+  children,
+}) {
+  return (
+    <>
+
+      <section className="pageHeading">
+
+        <div>
+
+          <p className="eyebrow">
+            {eyebrow}
+          </p>
+
+          <h1>
+            {title}
+          </h1>
+
+          <p className="muted">
+            {description}
+          </p>
+
+        </div>
+
+        <div className="systemBadge">
+          <span></span>
+          MODULE READY
+        </div>
+
+      </section>
+
+
+      <section className="panel modulePanel">
+        {children}
+      </section>
+
+    </>
   );
 }
 

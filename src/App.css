@@ -1,1001 +1,1546 @@
+:root {
+  --bg: #070b12;
+  --panel: #0d131d;
+  --panel-2: #111925;
+  --line: #202c3d;
+  --text: #edf3fb;
+  --muted: #8190a5;
+  --accent: #69a7ff;
+  --accent-strong: #2f80ff;
+  --green: #4ade80;
+  --red: #ff6262;
+}
+
 * {
   box-sizing: border-box;
 }
 
-.app {
-  min-height: 100vh;
-  display: flex;
-  background: #080a0f;
-  color: #f2f4f8;
+button {
+  font: inherit;
 }
 
-/* SIDEBAR */
-
-.sidebar {
-  width: 260px;
-  min-height: 100vh;
-  background: #0d1016;
-  border-right: 1px solid #1d222c;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 16px;
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
-.brand {
+/* =========================================================
+   MAIN APP
+========================================================= */
+
+.nexusApp {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      #101b2c 0,
+      var(--bg) 35%
+    );
+  color: var(--text);
+}
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.topbar {
+  height: 76px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 11, 18, 0.88);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0 28px;
+
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  backdrop-filter: blur(14px);
+}
+
+.topbarTitle,
+.topbarRight,
+.connection,
+.brandBlock,
+.navItem,
+.statCard,
+.panelHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  margin-bottom: 40px;
 }
 
+.topbarTitle {
+  gap: 12px;
+}
+
+.topbarTitle strong {
+  display: block;
+  letter-spacing: 0.18em;
+  font-size: 15px;
+}
+
+.topbarTitle span:last-child {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 3px;
+  letter-spacing: 0.08em;
+}
+
+.topbarSignal,
 .brandMark {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #3b4352;
+  width: 36px;
+  height: 36px;
+
   display: grid;
   place-items: center;
-  font-size: 20px;
-  font-weight: 700;
+
+  border: 1px solid #356eb8;
+  color: #8fc1ff;
+  background: #0b1a30;
+
+  border-radius: 10px;
+
+  font-weight: 800;
 }
 
-.brand h1 {
-  margin: 0;
-  font-size: 19px;
-  letter-spacing: 4px;
-}
-
-.brand span {
-  font-size: 8px;
-  letter-spacing: 2px;
-  color: #737b89;
-}
-
-.navLabel,
-.sectionLabel,
-.cardLabel {
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: #737b89;
-  font-weight: 600;
-}
-
-.navLabel {
-  padding: 0 12px;
-  margin-bottom: 10px;
-}
-
-.navigation {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.navItem {
-  border: 0;
-  background: transparent;
-  color: #8e96a4;
-  padding: 12px;
-  text-align: left;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: 0.2s;
-}
-
-.navItem:hover {
-  background: #151922;
-  color: #fff;
-}
-
-.navItem.active {
-  background: #181d27;
-  color: #fff;
-}
-
-.navDot {
-  font-size: 17px;
-  color: #596170;
-}
-
-.navItem.active .navDot {
-  color: #fff;
-}
-
-.sidebarBottom {
-  margin-top: auto;
+.topbarRight {
+  gap: 24px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .connection {
-  border-top: 1px solid #1d222c;
-  padding: 18px 8px 4px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.connection strong {
-  display: block;
-  font-size: 11px;
-}
-
-.connection small {
-  display: block;
-  color: #697180;
-  font-size: 9px;
-  margin-top: 4px;
-}
-
-/* MAIN */
-
-.main {
-  flex: 1;
-  min-width: 0;
-}
-
-.topbar {
-  height: 86px;
-  border-bottom: 1px solid #1d222c;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 34px;
-}
-
-.topbar h2 {
-  margin: 5px 0 0;
-  font-size: 22px;
-  font-weight: 500;
-}
-
-.topStatus,
-.systemState,
-.moduleStatus {
-  display: flex;
-  align-items: center;
   gap: 8px;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: #aeb5c0;
+  color: #a8b5c7;
 }
 
+.connection i,
+.systemBadge span,
 .statusDot {
   width: 7px;
   height: 7px;
+
   border-radius: 50%;
-  background: #9ee493;
-  display: inline-block;
-  box-shadow: 0 0 10px rgba(158, 228, 147, 0.5);
+
+  background: var(--green);
+
+  box-shadow:
+    0 0 12px rgba(74, 222, 128, 0.65);
 }
 
-/* CONTENT */
+/* =========================================================
+   LAYOUT
+========================================================= */
 
-.content {
-  padding: 34px;
+.appLayout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: calc(100vh - 76px);
 }
 
-.welcome {
-  border: 1px solid #1d222c;
-  background: #0d1016;
-  padding: 28px;
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+  border-right: 1px solid var(--line);
+
+  padding: 24px 14px;
+
+  background: rgba(9, 14, 22, 0.72);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.brandBlock {
+  gap: 10px;
+  padding: 4px 10px 28px;
+}
+
+.brandBlock strong {
+  display: block;
+  letter-spacing: 0.18em;
+  font-size: 14px;
+}
+
+.brandBlock span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.navMenu {
+  display: grid;
+  gap: 5px;
+}
+
+.navItem {
+  width: 100%;
+
+  gap: 12px;
+
+  border: 1px solid transparent;
+  background: transparent;
+
+  color: #8e9bad;
+
+  padding: 11px 12px;
+
+  border-radius: 9px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+  transition: 0.18s ease;
+}
+
+.navItem span {
+  width: 18px;
+  text-align: center;
+}
+
+.navItem:hover {
+  background: #101925;
+  color: var(--text);
+}
+
+.navItem.active {
+  background: #12233a;
+  border-color: #24466f;
+  color: #a8d0ff;
+}
+
+.sidebarFooter {
+  margin-top: auto;
+
+  color: #68788d;
+  font-size: 11px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 12px;
+}
+
+/* =========================================================
+   WORKSPACE
+========================================================= */
+
+.workspace {
+  padding: 30px;
+
+  max-width: 1500px;
+  width: 100%;
+
+  margin: 0 auto;
+}
+
+.pageHeading {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
+  align-items: flex-end;
+
+  margin-bottom: 24px;
+
+  gap: 20px;
 }
 
-.welcome h3,
-.modulePage h3 {
+.eyebrow {
+  color: #6283aa;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.16em;
+
+  margin-bottom: 6px;
+}
+
+h1 {
   font-size: 28px;
-  margin: 8px 0;
-  font-weight: 500;
+  letter-spacing: -0.03em;
+  margin: 0;
 }
 
-.welcome p {
-  color: #7f8794;
+h2 {
+  font-size: 16px;
   margin: 0;
-  max-width: 600px;
-  font-size: 13px;
+}
+
+h3 {
+  font-size: 19px;
+  margin-top: 4px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
   line-height: 1.6;
 }
 
-/* CARDS */
+/* =========================================================
+   STATUS
+========================================================= */
 
-.dashboardGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 14px;
-}
+.systemBadge,
+.livePill,
+.statePill {
+  border: 1px solid #25462f;
 
-.card,
-.largeCard,
-.modulePage {
-  border: 1px solid #1d222c;
-  background: #0d1016;
-}
+  color: #79e69b;
 
-.card {
-  padding: 20px;
-  min-height: 125px;
-}
+  background: #0b1a11;
 
-.card strong {
-  display: block;
-  font-size: 22px;
-  font-weight: 500;
-  margin-top: 14px;
-}
+  border-radius: 999px;
 
-.card small {
-  display: block;
-  color: #697180;
-  margin-top: 7px;
-  font-size: 10px;
-}
+  padding: 7px 10px;
 
-.lowerGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.largeCard {
-  padding: 22px;
-  min-height: 270px;
-}
-
-.cardHeader {
-  margin-bottom: 20px;
-}
-
-.cardHeader h3 {
-  margin: 6px 0 0;
-  font-size: 17px;
-  font-weight: 500;
-}
-
-.systemList {
-  border-top: 1px solid #1d222c;
-}
-
-.systemList div {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px 4px;
-  border-bottom: 1px solid #1d222c;
-  font-size: 12px;
-  color: #a5acb8;
-}
-
-.systemList b {
   font-size: 9px;
-  letter-spacing: 1px;
-  color: #9ee493;
-}
+  font-weight: 800;
 
-.event {
+  letter-spacing: 0.08em;
+
   display: flex;
-  gap: 15px;
-  padding: 14px 0;
-  border-bottom: 1px solid #1d222c;
-  font-size: 12px;
-  color: #a5acb8;
+  align-items: center;
+
+  gap: 7px;
+
+  white-space: nowrap;
 }
 
-.eventTime {
-  color: #626a78;
-  min-width: 40px;
+.systemBadge.dangerBadge {
+  color: #ff8b8b;
+  border-color: #5c2929;
+  background: #220f0f;
 }
 
-/* MODULE */
-
-.modulePage {
-  min-height: 420px;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.livePill,
+.statePill {
+  color: #7fa6d3;
+  border-color: #25384e;
+  background: #0c1622;
 }
 
-.modulePage p {
-  color: #747c89;
-  font-size: 13px;
+.statePill.safe {
+  color: #79e69b;
+  border-color: #25462f;
+  background: #0b1a11;
 }
 
-.moduleStatus {
-  margin-top: 30px;
+.statePill.danger {
+  color: #ff8b8b;
+  border-color: #5c2929;
+  background: #220f0f;
 }
 
-/* RESPONSIVE */
+/* =========================================================
+   STAT CARDS
+========================================================= */
 
-@media (max-width: 900px) {
-  .sidebar {
-    width: 210px;
-  }
-
-  .dashboardGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .lowerGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 650px) {
-  .sidebar {
-    width: 72px;
-    padding: 16px 8px;
-  }
-
-  .brand div:last-child,
-  .navLabel,
-  .navItem:not(.active)::after,
-  .connection div {
-    display: none;
-  }
-
-  .navItem {
-    justify-content: center;
-  }
-
-  .content {
-    padding: 20px;
-  }
-
-  .topbar {
-    padding: 0 20px;
-  }
-
-  .dashboardGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .welcome {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-}
-/* ================= MOBILITY ================= */
-
-.mobilityCard {
-  margin-bottom: 14px;
-}
-
-.modeGrid {
+.statGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+.statCard,
+.panel {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(17, 25, 37, 0.94),
+      rgba(10, 16, 25, 0.96)
+    );
+
+  border: 1px solid var(--line);
+
+  border-radius: 13px;
+}
+
+.statCard {
+  padding: 16px;
+
+  gap: 13px;
+
+  min-height: 82px;
+}
+
+.statIcon {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  background: #101e30;
+
+  color: #7eb5ff;
+
+  border: 1px solid #203b5c;
+}
+
+.statCard span:not(.statIcon) {
+  color: #66778d;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  display: block;
+}
+
+.statCard strong {
+  display: block;
+
+  margin-top: 5px;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   PANELS
+========================================================= */
+
+.contentGrid {
+  display: grid;
+
+  grid-template-columns:
+    1.35fr 0.9fr;
+
   gap: 12px;
 }
 
+.panel {
+  padding: 18px;
+
+  min-width: 0;
+}
+
+.panelHeader {
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+}
+
+/* =========================================================
+   CONTROL MODES
+========================================================= */
+
+.modeGrid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 9px;
+}
+
 .modeButton {
-  position: relative;
-  min-height: 150px;
-  padding: 20px;
-  border: 1px solid #1d222c;
-  background: #10141b;
-  color: #aeb5c0;
-  text-align: left;
+  border: 1px solid var(--line);
+
+  background: #0b111a;
+
+  color: var(--muted);
+
+  padding: 13px 10px;
+
+  border-radius: 10px;
+
   cursor: pointer;
-  transition: 0.2s;
+
+  text-align: left;
+
+  transition: 0.18s ease;
 }
 
 .modeButton:hover {
-  border-color: #394250;
-  background: #151a22;
+  border-color: #315a8c;
+
+  transform: translateY(-1px);
 }
 
 .modeButton.selected {
-  border-color: #6b7482;
-  background: #181d26;
-  color: #ffffff;
+  border-color: #3977bb;
+
+  background: #0d2036;
+
+  color: #dcecff;
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(89, 158, 238, 0.12);
 }
 
-.modeIcon {
+.modeButton span {
   display: block;
-  font-size: 24px;
-  margin-bottom: 14px;
+
+  font-size: 19px;
+
+  margin-bottom: 8px;
 }
 
 .modeButton strong {
   display: block;
-  font-size: 16px;
-  font-weight: 500;
+
+  font-size: 12px;
 }
 
 .modeButton small {
   display: block;
-  color: #68717f;
-  font-size: 10px;
-  margin-top: 7px;
-}
 
-.selectedLabel {
-  position: absolute;
-  right: 15px;
-  top: 15px;
   font-size: 8px;
-  letter-spacing: 1.5px;
-  color: #9ee493;
+
+  margin-top: 5px;
+
+  letter-spacing: 0.12em;
+
+  color: #61758f;
 }
 
-.mobilityGrid {
+.modeButton.selected small {
+  color: #74b5ff;
+}
+
+/* =========================================================
+   COMMAND
+========================================================= */
+
+.commandArea {
+  border-top: 1px solid var(--line);
+
+  margin-top: 18px;
+
+  padding-top: 18px;
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 25px;
+}
+
+.commandArea h3 {
+  color: #d9e8fb;
+
+  letter-spacing: 0.08em;
+}
+
+.dPad {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+
+  grid-template-columns:
+    repeat(3, 48px);
+
+  grid-template-rows:
+    repeat(2, 44px);
+
+  gap: 6px;
+}
+
+.dPad button {
+  border: 1px solid #2a3b51;
+
+  background: #111b29;
+
+  color: #9bb8d7;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition: 0.15s ease;
+}
+
+.dPad button:hover {
+  background: #17263a;
+  border-color: #4779ad;
+}
+
+.dPad button:first-child {
+  grid-column: 2;
+}
+
+.dPad button:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dPad .stopButton {
+  grid-column: 2;
+  grid-row: 2;
+
+  color: #ff8e8e;
+}
+
+.dPad button:last-child {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.largeDPad {
+  margin: 25px auto 5px;
+}
+
+/* =========================================================
+   HEALTH
+========================================================= */
+
+.healthRows {
+  display: grid;
+
+  gap: 1px;
+
+  background: var(--line);
+
+  border: 1px solid var(--line);
+
+  border-radius: 9px;
+
+  overflow: hidden;
+}
+
+.healthRows div {
+  display: flex;
+
+  justify-content: space-between;
+
+  padding: 11px;
+
+  background: #0a111a;
+
+  font-size: 11px;
+}
+
+.healthRows strong {
+  color: #bcd0e6;
+}
+
+.note {
+  margin-top: 10px;
+}
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+.eventPanel {
+  grid-column: 1 / -1;
+
+  min-height: auto;
+}
+
+.eventList {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 7px 18px;
+}
+
+.eventRow {
+  display: flex;
+
+  gap: 9px;
+
+  padding: 9px 0;
+
+  border-bottom: 1px solid #182231;
+}
+
+.eventDot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #5e9de8;
+
+  margin-top: 5px;
+
+  flex: 0 0 auto;
+}
+
+.eventRow small {
+  color: #596b82;
+
+  font-size: 9px;
+}
+
+.eventRow p {
+  color: #a9b6c7;
+
+  font-size: 11px;
+
+  margin-top: 3px;
+
+  line-height: 1.4;
+}
+
+/* =========================================================
+   MOBILITY
+========================================================= */
+
+.mobilityMainPanel {
+  margin-bottom: 12px;
+}
+
+.mobilityContentGrid {
+  display: grid;
+
+  grid-template-columns:
+    1.1fr 0.9fr;
+
+  gap: 12px;
 }
 
 .movementDisplay {
-  border: 1px solid #1d222c;
-  background: #080a0f;
-  padding: 20px;
-  text-align: center;
+  min-height: 120px;
+
+  border: 1px solid #182638;
+
+  border-radius: 10px;
+
+  background: #0a1018;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 5px;
+
+  margin-bottom: 20px;
 }
 
-.movementDisplay .movementLabel {
-  display: block;
-  font-size: 8px;
-  letter-spacing: 2px;
-  color: #626a78;
+.movementDisplay span {
+  color: #61758f;
+
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
 }
 
 .movementDisplay strong {
-  display: block;
-  font-size: 28px;
-  font-weight: 500;
-  margin: 8px 0;
+  font-size: 25px;
+
+  letter-spacing: 0.08em;
+
+  color: #dcecff;
 }
 
-.movementDisplay span:last-child {
-  color: #626a78;
+.movementDisplay small {
+  color: #5d7188;
+
   font-size: 10px;
 }
 
-.directionPad {
-  width: 210px;
-  margin: 25px auto 5px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
-}
-
-.directionPad button {
-  height: 55px;
-  border: 1px solid #292f39;
-  background: #12161d;
-  color: #d7dbe2;
-  cursor: pointer;
-  font-size: 20px;
-  transition: 0.2s;
-}
-
-.directionPad button:hover {
-  background: #1c222c;
-  border-color: #525b69;
-}
-
-.directionPad .stopButton {
-  font-size: 14px;
-  color: #ff9b9b;
-}
-
-.mobilityStats {
-  border-top: 1px solid #1d222c;
-}
-
-.mobilityStats div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 4px;
-  border-bottom: 1px solid #1d222c;
-}
-
-.mobilityStats span {
-  color: #747d8a;
-  font-size: 10px;
-  letter-spacing: 1px;
-}
-
-.mobilityStats b {
-  color: #aeb5c0;
-  font-size: 10px;
-  letter-spacing: 1px;
-}
-
-/* MOBILITY RESPONSIVE */
-
-@media (max-width: 800px) {
-  .modeGrid,
-  .mobilityGrid {
-    grid-template-columns: 1fr;
-  }
-}
-/* ================= LOCATION ================= */
-
-.locationStats {
-  margin-bottom: 14px;
-}
+/* =========================================================
+   LOCATION
+========================================================= */
 
 .locationGrid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 14px;
+
+  grid-template-columns:
+    1.35fr 0.9fr;
+
+  gap: 12px;
 }
 
 .mapCard {
-  min-height: 450px;
-}
-
-.mapStatus {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #8f98a6;
-  font-size: 9px;
-  letter-spacing: 1.5px;
+  min-height: 400px;
 }
 
 .map {
   position: relative;
-  height: 350px;
+
+  height: 330px;
+
   overflow: hidden;
-  border: 1px solid #1d222c;
-  background: #090c11;
+
+  border: 1px solid #1d2a3a;
+
+  border-radius: 10px;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #101d2c 0,
+      #080e16 65%
+    );
 }
 
 .mapGrid {
   position: absolute;
+
   inset: 0;
+
+  opacity: 0.4;
 
   background-image:
     linear-gradient(
-      rgba(100, 110, 125, 0.08) 1px,
+      #26364a 1px,
       transparent 1px
     ),
     linear-gradient(
       90deg,
-      rgba(100, 110, 125, 0.08) 1px,
+      #26364a 1px,
       transparent 1px
     );
 
-  background-size: 42px 42px;
-}
-
-.map::before,
-.map::after {
-  content: "";
-  position: absolute;
-  background: #171d26;
-}
-
-.map::before {
-  width: 100%;
-  height: 1px;
-  top: 48%;
-  left: 0;
-}
-
-.map::after {
-  width: 1px;
-  height: 100%;
-  left: 52%;
-  top: 0;
+  background-size: 45px 45px;
 }
 
 .vehicleMarker {
   position: absolute;
-  left: 52%;
-  top: 48%;
-  width: 20px;
-  height: 20px;
-  transform: translate(-50%, -50%);
-  border: 1px solid #dce2ea;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 0 20px rgba(220, 226, 234, 0.2);
+
+  left: 50%;
+  top: 50%;
+
+  width: 18px;
+  height: 18px;
+
+  transform:
+    translate(-50%, -50%)
+    rotate(45deg);
+
+  background: #69a7ff;
+
+  box-shadow:
+    0 0 25px
+    rgba(105, 167, 255, 0.65);
 }
 
 .vehicleMarker span {
+  position: absolute;
+
   width: 6px;
   height: 6px;
+
+  background: white;
+
   border-radius: 50%;
-  background: #dce2ea;
+
+  left: 6px;
+  top: 6px;
 }
 
 .mapCenterLabel {
   position: absolute;
-  left: 52%;
-  top: calc(48% + 20px);
+
+  left: 50%;
+  top: calc(50% + 30px);
+
   transform: translateX(-50%);
-  font-size: 8px;
-  letter-spacing: 2px;
-  color: #68717f;
+
+  color: #6d89a9;
+
+  font-size: 9px;
+
+  letter-spacing: 0.15em;
 }
 
 .mapCoordinates {
   position: absolute;
-  bottom: 14px;
-  left: 14px;
-  padding: 8px 10px;
-  border: 1px solid #242b35;
-  background: rgba(8, 10, 15, 0.9);
-  color: #8f98a6;
+
+  bottom: 12px;
+  left: 12px;
+
+  padding: 6px 9px;
+
+  border: 1px solid #25384e;
+
+  border-radius: 6px;
+
+  background: rgba(6, 11, 18, 0.8);
+
+  color: #88a5c5;
+
   font-size: 9px;
-  letter-spacing: 0.8px;
 }
 
-.gpsList {
-  border-top: 1px solid #1d222c;
-}
+/* =========================================================
+   BUTTONS
+========================================================= */
 
-.gpsList div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 4px;
-  border-bottom: 1px solid #1d222c;
-}
-
-.gpsList span {
-  color: #747d8a;
-  font-size: 10px;
-  letter-spacing: 1px;
-}
-
-.gpsList b {
-  color: #aeb5c0;
-  font-size: 9px;
-  letter-spacing: 1px;
-}
-
-.updateLocationButton,
-.gpsToggleButton {
+.toggleButton {
   width: 100%;
-  margin-top: 14px;
-  padding: 12px;
-  border: 1px solid #303742;
-  background: #141920;
-  color: #c7cdd6;
+
+  margin-top: 10px;
+
+  border: 1px solid #29466a;
+
+  background: #0d1d31;
+
+  color: #9ec8f7;
+
+  padding: 10px;
+
+  border-radius: 8px;
+
   cursor: pointer;
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  transition: 0.2s;
+
+  font-size: 11px;
+
+  transition: 0.18s ease;
 }
 
-.updateLocationButton:hover,
-.gpsToggleButton:hover {
-  background: #1b212a;
-  border-color: #555f6d;
+.toggleButton:hover {
+  background: #112942;
 }
 
-.gpsToggleButton {
-  margin-top: 8px;
-  color: #858e9b;
+.dangerToggle {
+  border-color: #693333;
+
+  background: #241111;
+
+  color: #ff9b9b;
 }
 
+.emergencyButton {
+  border-color: #693333;
 
-/* LOCATION RESPONSIVE */
+  background: #241111;
 
-@media (max-width: 900px) {
-
-  .locationGrid {
-    grid-template-columns: 1fr;
-  }
-
+  color: #ff9b9b;
 }
 
-@media (max-width: 650px) {
+.emergencyButtonActive {
+  background: #471313;
 
-  .map {
-    height: 280px;
-  }
-
+  border-color: #9a3737;
 }
-/* ================= CAMERA ================= */
-/* ================= CAMERA ================= */
+
+/* =========================================================
+   SAFETY ENGINE
+========================================================= */
+
+.safetyDashboard {
+  display: grid;
+
+  grid-template-columns:
+    1.1fr 0.9fr;
+
+  gap: 12px;
+}
+
+.safetyMainPanel {
+  min-height: 300px;
+}
+
+.safetyControlsPanel {
+  grid-column: 1 / -1;
+}
+
+.safetyIndicator {
+  min-height: 190px;
+
+  border: 1px solid #182638;
+
+  border-radius: 10px;
+
+  background: #0a1018;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  text-align: center;
+
+  gap: 7px;
+}
+
+.safetyIndicator strong {
+  font-size: 13px;
+
+  color: #cfe0f3;
+}
+
+.safetyIndicator small {
+  max-width: 380px;
+
+  color: #61758f;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+.safetyRing {
+  width: 66px;
+  height: 66px;
+
+  border: 1px solid #2b5d43;
+
+  border-radius: 50%;
+
+  display: grid;
+
+  place-items: center;
+
+  color: #74e49a;
+
+  background: #0b1811;
+
+  box-shadow:
+    0 0 30px
+    rgba(74, 222, 128, 0.08);
+
+  margin-bottom: 6px;
+}
+
+.safetyRing span {
+  font-size: 25px;
+}
+
+.dangerIndicator {
+  border-color: #3d2020;
+}
+
+.dangerIndicator .safetyRing {
+  border-color: #7a3030;
+
+  color: #ff7777;
+
+  background: #210f0f;
+
+  box-shadow:
+    0 0 30px
+    rgba(255, 80, 80, 0.1);
+}
+
+/* =========================================================
+   CAMERA
+========================================================= */
 
 .cameraGrid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 14px;
+
+  grid-template-columns:
+    1.35fr 0.9fr;
+
+  gap: 12px;
 }
 
 .cameraFeedCard {
-  min-height: 520px;
-}
-
-.cameraFeedStatus {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #8f98a6;
-  font-size: 9px;
-  letter-spacing: 1.5px;
+  min-height: 500px;
 }
 
 .cameraViewport {
   position: relative;
-  height: 390px;
-  overflow: hidden;
-  border: 1px solid #1d222c;
-  background: #07090d;
-}
 
-.cameraViewport.nightVision {
-  background: #050906;
+  min-height: 390px;
+
+  overflow: hidden;
+
+  border: 1px solid #1e2b3d;
+
+  border-radius: 10px;
+
+  background: #05090e;
 }
 
 .webcamVideo {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  height: 390px;
+
   object-fit: cover;
-  transform: scaleX(-1);
+
   display: block;
+
+  transform: scaleX(-1);
+
+  background: #05090e;
 }
 
 .cameraViewport.nightVision .webcamVideo {
   filter:
     grayscale(1)
-    sepia(1)
-    hue-rotate(70deg)
-    saturate(1.5)
-    brightness(0.8);
+    contrast(1.3)
+    brightness(0.75);
 }
 
 .cameraStartOverlay {
   position: absolute;
+
   inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+
+  display: grid;
+
+  place-items: center;
+
   background:
     radial-gradient(
-      circle at center,
-      #151b23 0%,
-      #0b0e13 55%,
-      #07090d 100%
+      circle,
+      rgba(20, 35, 55, 0.8),
+      rgba(5, 9, 14, 0.96)
     );
+
+  text-align: center;
 }
 
 .cameraStartOverlay > div {
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
+
+  gap: 8px;
 }
 
 .cameraStartIcon {
   font-size: 30px;
-  color: #7f8895;
-  margin-bottom: 15px;
+
+  color: #6d9ed1;
 }
 
 .cameraStartOverlay strong {
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 2px;
+  color: #b7cce3;
+
+  font-size: 11px;
+
+  letter-spacing: 0.12em;
 }
 
 .cameraStartOverlay small {
-  color: #626b78;
+  color: #5c7087;
+
   font-size: 10px;
-  margin-top: 8px;
 }
 
 .cameraStartOverlay button {
-  margin-top: 20px;
-  padding: 11px 24px;
-  border: 1px solid #3a424e;
-  background: #151a21;
-  color: #d2d7df;
-  cursor: pointer;
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  transition: 0.2s;
-}
+  margin-top: 8px;
 
-.cameraStartOverlay button:hover {
-  background: #202630;
-  border-color: #657080;
+  border: 1px solid #315d8f;
+
+  background: #10233a;
+
+  color: #9fc8f5;
+
+  padding: 9px 16px;
+
+  border-radius: 7px;
+
+  cursor: pointer;
+
+  font-size: 10px;
 }
 
 .cameraError {
-  max-width: 300px;
-  margin-top: 14px;
-  color: #d88b8b;
-  font-size: 9px;
-  line-height: 1.5;
+  max-width: 280px;
+
+  color: #ff8888;
+
+  font-size: 10px;
+
+  line-height: 1.4;
 }
 
 .cameraScanlines {
   position: absolute;
+
   inset: 0;
 
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0px,
-    transparent 3px,
-    rgba(255, 255, 255, 0.025) 4px
-  );
-
   pointer-events: none;
+
+  opacity: 0.08;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 3px,
+      #ffffff 4px
+    );
 }
 
 .cameraCrosshair {
   position: absolute;
+
   left: 50%;
   top: 50%;
-  width: 80px;
-  height: 80px;
+
+  width: 70px;
+  height: 70px;
+
   transform: translate(-50%, -50%);
+
   pointer-events: none;
 }
 
 .cameraCrosshair span {
   position: absolute;
-  background: rgba(220, 226, 234, 0.65);
+
+  width: 15px;
+  height: 15px;
+
+  border-color: #8ab9e8;
 }
 
 .cameraCrosshair span:nth-child(1) {
-  width: 1px;
-  height: 25px;
-  left: 39px;
   top: 0;
+  left: 0;
+
+  border-top: 1px solid;
+  border-left: 1px solid;
 }
 
 .cameraCrosshair span:nth-child(2) {
-  width: 1px;
-  height: 25px;
-  left: 39px;
-  bottom: 0;
+  top: 0;
+  right: 0;
+
+  border-top: 1px solid;
+  border-right: 1px solid;
 }
 
 .cameraCrosshair span:nth-child(3) {
-  height: 1px;
-  width: 25px;
+  bottom: 0;
   left: 0;
-  top: 39px;
+
+  border-bottom: 1px solid;
+  border-left: 1px solid;
 }
 
 .cameraCrosshair span:nth-child(4) {
-  height: 1px;
-  width: 25px;
+  bottom: 0;
   right: 0;
-  top: 39px;
+
+  border-bottom: 1px solid;
+  border-right: 1px solid;
 }
 
 .cameraCorner {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-color: #737d8b;
-  border-style: solid;
-  pointer-events: none;
+
+  width: 28px;
+  height: 28px;
+
+  border-color: #75a7d8;
+
+  opacity: 0.7;
 }
 
 .cameraCorner.topLeft {
-  left: 18px;
-  top: 18px;
-  border-width: 1px 0 0 1px;
+  top: 15px;
+  left: 15px;
+
+  border-top: 1px solid;
+  border-left: 1px solid;
 }
 
 .cameraCorner.topRight {
-  right: 18px;
-  top: 18px;
-  border-width: 1px 1px 0 0;
+  top: 15px;
+  right: 15px;
+
+  border-top: 1px solid;
+  border-right: 1px solid;
 }
 
 .cameraCorner.bottomLeft {
-  left: 18px;
-  bottom: 18px;
-  border-width: 0 0 1px 1px;
+  bottom: 15px;
+  left: 15px;
+
+  border-bottom: 1px solid;
+  border-left: 1px solid;
 }
 
 .cameraCorner.bottomRight {
-  right: 18px;
-  bottom: 18px;
-  border-width: 0 1px 1px 0;
+  bottom: 15px;
+  right: 15px;
+
+  border-bottom: 1px solid;
+  border-right: 1px solid;
 }
 
 .cameraOverlayTop,
 .cameraOverlayBottom {
   position: absolute;
-  left: 18px;
-  right: 18px;
+
+  left: 14px;
+  right: 14px;
+
   display: flex;
+
   justify-content: space-between;
-  color: #d0d5dd;
+
+  color: #a4c5e8;
+
   font-size: 9px;
-  letter-spacing: 1.2px;
+
+  letter-spacing: 0.1em;
+
   pointer-events: none;
 }
 
 .cameraOverlayTop {
-  top: 18px;
+  top: 12px;
 }
 
 .cameraOverlayBottom {
-  bottom: 18px;
-}
-
-.cameraStats {
-  border-top: 1px solid #1d222c;
-}
-
-.cameraStats div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 4px;
-  border-bottom: 1px solid #1d222c;
-}
-
-.cameraStats span {
-  color: #747d8a;
-  font-size: 10px;
-  letter-spacing: 1px;
-}
-
-.cameraStats b {
-  color: #aeb5c0;
-  font-size: 9px;
-  letter-spacing: 1px;
+  bottom: 12px;
 }
 
 .cameraControls {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+
   gap: 8px;
-  margin-top: 18px;
+
+  margin-top: 15px;
 }
 
 .cameraControls button {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #303742;
-  background: #141920;
-  color: #c7cdd6;
+  border: 1px solid #29466a;
+
+  background: #0d1d31;
+
+  color: #9ec8f7;
+
+  padding: 10px;
+
+  border-radius: 8px;
+
   cursor: pointer;
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  transition: 0.2s;
+
+  font-size: 10px;
 }
 
-.cameraControls button:hover:not(:disabled) {
-  background: #1b212a;
-  border-color: #555f6d;
+.cameraControls button:hover {
+  background: #112942;
 }
 
 .cameraControls button:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
+
   cursor: not-allowed;
 }
 
-.statusOffline {
-  background: #666d78;
-  box-shadow: none;
+/* =========================================================
+   MODULES
+========================================================= */
+
+.modulePanel {
+  max-width: 900px;
 }
 
+.moduleNote {
+  margin-top: 16px;
+}
 
-/* CAMERA RESPONSIVE */
+.healthDashboard {
+  display: grid;
 
-@media (max-width: 900px) {
-  .cameraGrid {
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 10px;
+}
+
+.healthMetric {
+  padding: 20px;
+
+  border: 1px solid #1d2a3a;
+
+  border-radius: 10px;
+
+  background: #0a1018;
+}
+
+.healthMetric span {
+  color: #62748a;
+
+  display: block;
+
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
+}
+
+.healthMetric strong {
+  display: inline-block;
+
+  margin-top: 15px;
+
+  font-size: 28px;
+}
+
+.healthMetric small {
+  color: #65778c;
+
+  margin-left: 5px;
+}
+
+.communicationPanel {
+  display: grid;
+
+  gap: 18px;
+}
+
+.communicationStatus {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  color: #79e69b;
+
+  font-size: 10px;
+
+  letter-spacing: 0.1em;
+}
+
+.communicationGrid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 10px;
+}
+
+.communicationGrid button {
+  border: 1px solid #263a53;
+
+  background: #0b1522;
+
+  color: #a7c4e3;
+
+  padding: 16px;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  font-size: 11px;
+
+  letter-spacing: 0.08em;
+}
+
+.communicationGrid button:hover {
+  border-color: #3977bb;
+
+  background: #0d2036;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1050px) {
+
+  .statGrid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .contentGrid,
+  .mobilityContentGrid,
+  .locationGrid,
+  .cameraGrid,
+  .safetyDashboard {
     grid-template-columns: 1fr;
   }
+
+  .eventPanel {
+    grid-column: auto;
+  }
+
+  .safetyControlsPanel {
+    grid-column: auto;
+  }
+
 }
 
-@media (max-width: 650px) {
-  .cameraViewport {
-    height: 280px;
+@media (max-width: 760px) {
+
+  .appLayout {
+    grid-template-columns: 1fr;
   }
+
+  .sidebar {
+    display: none;
+  }
+
+  .workspace {
+    padding: 20px;
+  }
+
+  .topbar {
+    padding: 0 18px;
+  }
+
+  .topbarRight .clock {
+    display: none;
+  }
+
+  .pageHeading {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .eventList {
+    grid-template-columns: 1fr;
+  }
+
+  .healthDashboard,
+  .communicationGrid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 520px) {
+
+  .statGrid,
+  .modeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .commandArea {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
 }
