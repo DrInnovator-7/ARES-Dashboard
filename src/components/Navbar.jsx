@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+function Navbar({ activePage, setActivePage }) 
 function Navbar() {
 
   const [time, setTime] = useState("");
@@ -24,7 +24,7 @@ function Navbar() {
 
     <header className="navbar">
 
-      <h2>🛰 ARES Mission Command Center</h2>
+      <h2>NEXUS</h2>
 
       <div className="navRight">
 
@@ -42,3 +42,12 @@ function Navbar() {
 }
 
 export default Navbar;
+{navigation.map((item) => (
+  <button
+    key={item}
+    onClick={() => setActivePage(item)}
+    className={activePage === item ? "active" : ""}
+  >
+    {item}
+  </button>
+))}
