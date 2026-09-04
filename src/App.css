@@ -558,37 +558,25 @@ h3 {
 
 .dPad {
   display: grid;
-
-  grid-template-columns:
-    repeat(3, 48px);
-
-  grid-template-rows:
-    repeat(2, 44px);
-
+  grid-template-columns: 48px 48px 48px;
+  grid-template-rows: 48px 48px 48px;
   gap: 6px;
+  width: max-content;
+  margin: 0 auto;
 }
 
 .dPad button {
-  border: 1px solid #2a3b51;
-
-  background: #111b29;
-
-  color: #9bb8d7;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  transition: 0.15s ease;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.dPad button:hover {
-  background: #17263a;
-  border-color: #4779ad;
-}
-
-.dPad button:first-child {
+.dPad button:nth-child(1) {
   grid-column: 2;
+  grid-row: 1;
 }
 
 .dPad button:nth-child(2) {
@@ -596,20 +584,19 @@ h3 {
   grid-row: 2;
 }
 
-.dPad .stopButton {
+.dPad button:nth-child(3) {
   grid-column: 2;
   grid-row: 2;
-
-  color: #ff8e8e;
 }
 
-.dPad button:last-child {
+.dPad button:nth-child(4) {
   grid-column: 3;
   grid-row: 2;
 }
 
-.largeDPad {
-  margin: 25px auto 5px;
+.dPad button:nth-child(5) {
+  grid-column: 2;
+  grid-row: 3;
 }
 
 /* =========================================================
@@ -1543,4 +1530,120 @@ h3 {
     align-items: flex-start;
   }
 
+}
+/* =========================================================
+   COMMUNICATION / COMPUTER VISION
+   CV PHASE 1B
+   ========================================================= */
+
+.communicationGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.8fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.communicationCameraCard {
+  min-width: 0;
+}
+
+.communicationViewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #02050a;
+  margin-top: 14px;
+}
+
+.communicationViewport .webcamVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1);
+}
+
+.handLandmarkCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform: scaleX(-1);
+}
+
+.communicationViewport .cameraScanlines {
+  z-index: 3;
+}
+
+.communicationViewport .cameraCorner,
+.communicationViewport .cameraOverlayTop,
+.communicationViewport .cameraOverlayBottom {
+  z-index: 4;
+}
+
+.communicationViewport .cameraStartOverlay {
+  z-index: 5;
+}
+
+.communicationNext {
+  margin-top: 18px;
+}
+
+.cvPipeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.cvPipeline > div:not(.pipelineArrow) {
+  min-width: 145px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+}
+
+.cvPipeline span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.cvPipeline strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.cvPipeline small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pipelineArrow {
+  color: var(--accent);
+  font-size: 20px;
+}
+
+.pipelineFuture {
+  opacity: 0.55;
+}
+
+@media (max-width: 900px) {
+  .communicationGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cvPipeline {
+    flex-wrap: wrap;
+  }
 }

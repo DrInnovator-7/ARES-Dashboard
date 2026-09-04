@@ -785,11 +785,7 @@ function App() {
                   </div>
 
 
-                  <p className="muted note">
-                    Sensor connection will be
-                    added during hardware
-                    integration.
-                  </p>
+                  
 
                 </div>
 
@@ -1205,12 +1201,7 @@ function App() {
 
               </div>
 
-              <p className="muted moduleNote">
-                MAX30102 and temperature sensing
-                will be connected during the hardware
-                integration phase.
-              </p>
-
+            
             </ModulePage>
           )}
 
@@ -2045,51 +2036,9 @@ function App() {
             <ModulePage
               eyebrow="ASSISTIVE COMMUNICATION"
               title="Communication"
-              description="Communication interface for gesture-based and connected assistance."
+              description="Camera-based hand gesture recognition for assistive communication."
             >
-
-              <div className="communicationPanel">
-
-                <div className="communicationStatus">
-                  <span className="statusDot"></span>
-                  COMMUNICATION READY
-                </div>
-
-                <div className="communicationGrid">
-
-                  <button>
-                    HELP
-                  </button>
-
-                  <button>
-                    WATER
-                  </button>
-
-                  <button>
-                    YES
-                  </button>
-
-                  <button>
-                    NO
-                  </button>
-
-                  <button>
-                    EMERGENCY
-                  </button>
-
-                  <button>
-                    CALL CAREGIVER
-                  </button>
-
-                </div>
-
-                <p className="muted">
-                  Camera-based gesture communication
-                  will be integrated into this module.
-                </p>
-
-              </div>
-
+              <CommunicationVision onEvent={addEvent} />
             </ModulePage>
           )}
 
