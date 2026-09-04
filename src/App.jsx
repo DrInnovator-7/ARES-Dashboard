@@ -816,11 +816,7 @@ function App() {
                   </div>
 
 
-                  <p className="muted note">
-                    Sensor connection will be
-                    added during hardware
-                    integration.
-                  </p>
+                  
 
                 </div>
 
@@ -1236,11 +1232,7 @@ function App() {
 
               </div>
 
-              <p className="muted moduleNote">
-                MAX30102 and temperature sensing
-                will be connected during the hardware
-                integration phase.
-              </p>
+              
 
             </ModulePage>
           )}
