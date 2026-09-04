@@ -35,6 +35,7 @@ const modes = [
 
 function App() {
   const [activePage, setActivePage] = useState("Overview");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const [mode, setMode] = useState("JOYSTICK");
   const [movement, setMovement] = useState("STOPPED");
@@ -371,6 +372,11 @@ function App() {
     return icons[page];
   };
 
+  const navigateTo = (page) => {
+    setActivePage(page);
+    setMobileNavOpen(false);
+  };
+
   // --------------------------------------------------
   // RENDER
   // --------------------------------------------------
@@ -397,6 +403,15 @@ function App() {
 
         <div className="topbarRight">
 
+          <button
+            className="mobileMenuButton"
+            aria-label="Open navigation"
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen(true)}
+          >
+            ☰
+          </button>
+
           <div className="clock">
             {new Date().toLocaleTimeString()}
           </div>
@@ -415,7 +430,7 @@ function App() {
 
         {/* SIDEBAR */}
 
-        <aside className="sidebar">
+        <aside className={`sidebar ${mobileNavOpen ? "mobileOpen" : ""}`}>
 
           <div className="brandBlock">
 
@@ -429,6 +444,14 @@ function App() {
             </div>
 
           </div>
+
+          <button
+            className="mobileCloseButton"
+            aria-label="Close navigation"
+            onClick={() => setMobileNavOpen(false)}
+          >
+            ×
+          </button>
 
 
           <nav
@@ -446,7 +469,7 @@ function App() {
                     : ""
                 }`}
                 onClick={() =>
-                  setActivePage(page)
+                  navigateTo(page)
                 }
               >
 
@@ -472,6 +495,14 @@ function App() {
           </div>
 
         </aside>
+
+        {mobileNavOpen && (
+          <button
+            className="mobileOverlay"
+            aria-label="Close navigation"
+            onClick={() => setMobileNavOpen(false)}
+          />
+        )}
 
 
         {/* WORKSPACE */}
@@ -785,7 +816,11 @@ function App() {
                   </div>
 
 
-                  
+                  <p className="muted note">
+                    Sensor connection will be
+                    added during hardware
+                    integration.
+                  </p>
 
                 </div>
 
@@ -1201,7 +1236,12 @@ function App() {
 
               </div>
 
-            
+              <p className="muted moduleNote">
+                MAX30102 and temperature sensing
+                will be connected during the hardware
+                integration phase.
+              </p>
+
             </ModulePage>
           )}
 

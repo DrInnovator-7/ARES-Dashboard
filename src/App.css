@@ -1647,3 +1647,160 @@ h3 {
     flex-wrap: wrap;
   }
 }
+/* ==========================================================
+   NEXUS MOBILE NAVIGATION
+   Keeps the OG desktop UI and adds a slide-out menu on phones.
+   ========================================================== */
+
+.mobileMenuButton,
+.mobileCloseButton,
+.mobileOverlay {
+  display: none;
+}
+
+@media (max-width: 760px) {
+
+  .topbar {
+    padding: 0 16px;
+    height: 68px;
+  }
+
+  .topbarTitle {
+    min-width: 0;
+  }
+
+  .topbarTitle > div:last-child span {
+    display: none;
+  }
+
+  .topbarRight {
+    gap: 10px;
+  }
+
+  .topbarRight .clock {
+    display: none;
+  }
+
+  .mobileMenuButton {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #29466a;
+    border-radius: 9px;
+    background: #0d1d31;
+    color: #9ec8f7;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .appLayout {
+    display: block;
+    min-height: calc(100vh - 68px);
+  }
+
+  .sidebar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(82vw, 300px);
+    height: 100dvh;
+    z-index: 1000;
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.35);
+    overflow-y: auto;
+  }
+
+  .sidebar.mobileOpen {
+    transform: translateX(0);
+  }
+
+  .mobileCloseButton {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    top: 18px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #29466a;
+    border-radius: 8px;
+    background: #0d1d31;
+    color: #9ec8f7;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .mobileOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.58);
+    cursor: pointer;
+  }
+
+  .workspace {
+    width: 100%;
+    max-width: none;
+    padding: 20px 16px 28px;
+  }
+
+  .pageHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pageHeading .systemBadge {
+    align-self: flex-start;
+  }
+
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .eventPanel {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 520px) {
+
+  .workspace {
+    padding: 16px 12px 24px;
+  }
+
+  .topbarTitle strong {
+    font-size: 14px;
+  }
+
+  .modeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .commandArea {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dPad {
+    margin: 0 auto;
+  }
+
+  .healthDashboard,
+  .locationGrid,
+  .communicationGrid {
+    grid-template-columns: 1fr;
+  }
+}
